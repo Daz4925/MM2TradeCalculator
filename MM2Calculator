@@ -1,0 +1,605 @@
+--// REALTIME TRADE CALCULATOR (VISIBLE TEXT ONLY)
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+------------------------------------------------
+-- VALUE TABLE (YOU ADD)
+------------------------------------------------
+
+local ItemValues = {
+	Icepiercer = 195,
+	Plasmablade = 18,
+
+	["Traveler's Gun"] = 5500,
+	["Evergun"] = 3300,
+	["Constellation"] = 2600,
+	["Turkey"] = 2450,
+	["Evergreen"] = 2425,
+	["Alienbeam"] = 2050,
+	["Vampire's Gun"] = 1700,
+	["Darkshot"] = 1500,
+	["Darksword"] = 1480,
+	["Blossom"] = 1265,
+	["Sakura"] = 1255,
+	["Sunrise"] = 1150,
+	["Raygun"] = 1150,
+	["Bauble"] = 900,
+	["Snowcannon"] = 850,
+	["Sunset"] = 575,
+	["Soul"] = 500,
+	["Spirit"] = 490,
+	["Flora"] = 410,
+	["Bloom"] = 390,
+	["Rainbow Gun"] = 320,
+	["Rainbow"] = 310,
+	["Heart Wand"] = 290,
+	["Watergun"] = 275,
+	["Snow Dagger"] = 260,
+	["Xenoknife"] = 245,
+	["Xenoshot"] = 245,
+	["Ocean"] = 230,
+	["Waves"] = 225,
+	["Flowerwood Gun"] = 210,
+	["Flowerwood"] = 205,
+	["Blizzard"] = 175,
+	["Snowstorm"] = 175,
+	["Treat"] = 140,
+	["Sweet"] = 135,
+	["Bat"] = 125,
+	["Borealis"] = 105,
+	["Australis"] = 100,
+	["Candy"] = 85,
+	["Pearlshine"] = 80,
+	["Pearl"] = 75,
+	["Heartblade"] = 70,
+	["Luger"] = 45,
+	["Red Luger"] = 42,
+	["Candleflame"] = 40,
+	["Darkbringer"] = 40,
+	["Elderwood Blade"] = 40,
+	["Elderwood Revolver"] = 40,
+	["Iceblaster"] = 40,
+	["Makeshift"] = 40,
+	["Phantom"] = 40,
+	["Spectre"] = 40,
+	["Sugar"] = 38,
+	["Lightbringer"] = 37,
+	["Ornament"] = 28,
+	["Green Luger"] = 25,
+	["Amerilaser"] = 23,
+	["Hallowgun"] = 23,
+	["Laser"] = 23,
+	["Swirly Gun"] = 23,
+	["Icebeam"] = 20,
+	["Nightblade"] = 20,
+	["Shark"] = 20,
+	["Blaster"] = 18,
+	["Iceflake"] = 18,
+	["Plasmabeam"] = 18,
+	["Battleaxe II"] = 17,
+	["Ginger Luger"] = 17,
+	["Old Glory"] = 17,
+	["Pixel"] = 17,
+	["Plasmablade"] = 17,
+	["Slasher"] = 17,
+	["Cookiecane"] = 15,
+	["Eternalcane"] = 15,
+	["Gemstone"] = 15,
+	["Gingerblade"] = 15,
+	["Gingermint"] = 15,
+	["Jinglegun"] = 15,
+	["Lugercane"] = 15,
+	["Minty"] = 15,
+	["Nebula"] = 15,
+	["Swirly Blade"] = 15,
+	["Vampire's Edge"] = 15,
+	["Virtual"] = 15,
+	["Deathshard"] = 13,
+	["Battleaxe"] = 12,
+	["Bioblade"] = 10,
+	["Chill"] = 10,
+	["Clockwork"] = 10,
+	["Eternal III"] = 10,
+	["Eternal IV"] = 10,
+	["Fang"] = 10,
+	["Frostsaber"] = 10,
+	["Heat"] = 10,
+	["Spider"] = 10,
+	["Tides"] = 10,
+	["Eternal"] = 8,
+	["Eternal II"] = 8,
+	["Hallow's Blade"] = 8,
+	["Hallow's Edge"] = 8,
+	["Handsaw"] = 8,
+	["Xmas"] = 8,
+	["Boneblade"] = 7,
+	["Frostbite"] = 7,
+	["Ghostblade"] = 7,
+	["Ice Dragon"] = 7,
+	["Ice Shard"] = 7,
+	["Prismatic"] = 7,
+	["Pumpking"] = 7,
+	["Saw"] = 7,
+	["Eggblade"] = 5,
+	["Flames"] = 5,
+	["Snowflake"] = 5,
+	["Winter's Edge"] = 5,
+	["Peppermint"] = 4,
+	["Cookieblade"] = 3,
+	["Blue Seer"] = 3,
+	["Purple Seer"] = 3,
+	["Red Seer"] = 3,
+	["Seer"] = 3,
+	["Orange Seer"] = 2,
+	["Yellow Seer"] = 2,
+    ["Chroma Traveler's Gun"] = 225000,
+	["Chroma Evergun"] = 76000,
+	["Chroma Evergreen"] = 60000,
+	["Chroma Bauble"] = 38000,
+	["Chroma Vampire's Gun"] = 35000,
+	["Chroma Constellation"] = 33000,
+	["Chroma Alienbeam"] = 30000,
+	["Chroma Raygun"] = 14500,
+	["Chroma Sunrise"] = 11250,
+	["Chroma Snowcannon"] = 8500,
+	["Chroma Blizzard"] = 8000,
+	["Chroma Sunset"] = 6500,
+	["Chroma Snow Dagger"] = 5750,
+	["Chroma Heart Wand"] = 4750,
+	["Chroma Snowstorm"] = 4250,
+	["Chroma Treat"] = 4250,
+	["Chroma Watergun"] = 3400,
+	["Chroma Sweet"] = 2700,
+	["Chroma Ornament"] = 2300,
+	["Chroma Darkbringer"] = 75,
+	["Chroma Lightbringer"] = 70,
+	["Chroma Luger"] = 55,
+	["Chroma Candleflame"] = 45,
+	["Chroma Elderwood Blade"] = 45,
+	["Chroma Swirly Gun"] = 45,
+	["Chroma Laser"] = 42,
+	["Chroma Cookiecane"] = 38,
+	["Chroma Deathshard"] = 38,
+	["Chroma Slasher"] = 38,
+	["Chroma Fang"] = 35,
+	["Chroma Shark"] = 35,
+	["Chroma Gemstone"] = 32,
+	["Chroma Gingerblade"] = 32,
+	["Chroma Heat"] = 32,
+	["Chroma Seer"] = 32,
+	["Chroma Saw"] = 30,
+	["Chroma Tides"] = 30,
+	["Chroma Boneblade"] = 27,
+	["Chroma Fire Bat"] = 5,
+	["Chroma Fire Bear"] = 5,
+	["Chroma Fire Bunny"] = 5,
+	["Chroma Fire Cat"] = 5,
+	["Chroma Fire Dog"] = 5,
+	["Chroma Fire Fox"] = 5,
+	["Chroma Fire Pig"] = 5,
+    ["JD"] = 35,
+	["Latte (Gun)"] = 130,
+	["Latte (Knife)"] = 130,
+	["Spectral (Knife)"] = 50,
+	["Traveler (Gun)"] = 50,
+	["Aurora (Gun)"] = 45,
+	["Vampire (Gun)"] = 45,
+	["Cotton Candy"] = 40,
+	["Beach"] = 30,
+	["Cavern (Knife)"] = 7,
+	["Broken"] = 7,
+	["Arctic (Gun)"] = 5,
+	["Icedriller"] = 5,
+	["Nightsky"] = 5,
+	["Ghost (Knife)"] = 5,
+	["Ginger (Gun)"] = 5,
+	["Skulls"] = 5,
+	["Bunnies"] = 4,
+	["Red Scratch"] = 4,
+	["Aurora (Knife)"] = 3,
+	["Spectral (Gun)"] = 3,
+	["Traveler (Knife)"] = 3,
+	["Vampire (Knife)"] = 3,
+	["Witched"] = 3,
+	["Blue Elite"] = 3,
+	["Green Elite"] = 3,
+	["Santa's Magic"] = 3,
+	["Santa's Spirit"] = 3,
+	["Blue Scratch"] = 2,
+	["Ghost (Gun)"] = 2,
+	["Chromatic (Knife)"] = 1,
+	["Energized (Gun)"] = 1,
+	["Frostfade (Knife)"] = 1,
+	["Icecracker"] = 1,
+	["Red Fire"] = 1,
+	["Cavern (Gun)"] = 1,
+    ["Ghost"] = 10,
+	["Blood"] = 8,
+	["Laser"] = 8,
+	["America"] = 7,
+	["Prince"] = 6,
+	["Shadow"] = 6,
+	["Phaser"] = 5,
+	["Cowboy"] = 4,
+	["Golden"] = 4,
+	["Splitter"] = 3,
+    ["Gingerscope"] = 17000,
+	["Traveler's Axe"] = 8400,
+	["Celestial"] = 1800,
+	["Vampire's Axe"] = 1050,
+	["Harvester"] = 280,
+	["Icepiercer"] = 180,
+	["Icebreaker"] = 70,
+	["Batwing"] = 45,
+	["Elderwood Scythe"] = 45,
+	["Swirly Axe"] = 42,
+	["Hallowscythe"] = 32,
+	["Logchopper"] = 18,
+	["Icewing"] = 15,
+    ["Corrupt"] = 475,
+    ["Zombie Dog"] = 850,
+	["Black Cat"] = 280,
+	["Elf (2019)"] = 225,
+	["Blue Pumpkin (2018)"] = 220,
+	["Dogey"] = 125,
+	["Red Pumpkin (2018)"] = 120,
+	["Green Pumpkin (2018)"] = 60,
+	["Pumpkin (2017)"] = 40,
+	["Mr. Reindeer"] = 40,
+	["Piggy"] = 25,
+	["Elf"] = 10,
+	["Red Pumpkin (2020)"] = 10,
+	["<3"] = 10,
+	["Green Pumpkin (2020)"] = 8,
+	["Red Pumpkin (2021)"] = 8,
+	["Skully"] = 8,
+	["Fairy"] = 8,
+	["Nobledragon"] = 8,
+	["Seahorsey"] = 8,
+	["Green Pumpkin (2021)"] = 7,
+	["Chilly"] = 7,
+	["Eyeball"] = 7,
+	["Green Pumpkin (2019)"] = 7,
+	["Jetstream"] = 7,
+	["Overseer Eye"] = 7,
+	["Pengy"] = 7,
+	["Purple Pumpkin (2018)"] = 7,
+	["Red Pumpkin (2019)"] = 7,
+	["Reindeer"] = 7,
+	["Rudolph"] = 7,
+	["Tankie"] = 7,
+	["Vampire Bat"] = 7,
+	["Mr. Snowman"] = 5,
+	["Mechbug"] = 5,
+	["UFO"] = 4,
+	["Blue Pumpkin (2020)"] = 3,
+	["Shadow Pumpkin"] = 2,
+	["Blue Pumpkin (2019)"] = 2,
+	["Badger"] = 1,
+	["Deathspeaker"] = 1,
+	["Electro"] = 1,
+	["Frostbird"] = 1,
+	["Ice Phoenix"] = 1,
+	["Phoenix"] = 1,
+	["Sammy"] = 1,
+	["Skelly"] = 1,
+	["Steambird"] = 1,
+	["Traveller"] = 1,
+}
+
+------------------------------------------------
+-- UI
+------------------------------------------------
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "TradeCalculator"
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 999999
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+gui.Parent = playerGui
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 260, 0, 120)
+frame.Position = UDim2.new(0.5, -130, 0.2, 0)
+frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+frame.Active = true
+frame.Draggable = true
+frame.ZIndex = 999999
+frame.Parent = gui
+
+local text = Instance.new("TextLabel")
+text.Size = UDim2.new(1,0,1,0)
+text.BackgroundTransparency = 1
+text.TextScaled = true
+text.TextColor3 = Color3.fromRGB(255,255,255)
+text.ZIndex = 999999
+text.Text = "Loading..."
+text.Parent = frame
+
+------------------------------------------------
+-- TRADE GETTER
+------------------------------------------------
+
+local function getTrade()
+	local tradeGui = playerGui:FindFirstChild("TradeGUI")
+	if not tradeGui then return end
+
+	local container = tradeGui:FindFirstChild("Container")
+	if not container then return end
+
+	return container:FindFirstChild("Trade")
+end
+
+------------------------------------------------
+-- SLOT READER (VISIBLE TEXT ONLY)
+------------------------------------------------
+
+local function readSlot(slot)
+	if not slot or not slot.Visible then
+		return 0
+	end
+
+	------------------------------------------------
+	-- ITEM NAME
+	------------------------------------------------
+
+	local name = nil
+
+	local itemNameObj = slot:FindFirstChild("ItemName", true)
+
+	if itemNameObj then
+		local label = itemNameObj:FindFirstChild("Label")
+
+		if label and label:IsA("TextLabel") then
+			name = label.Text
+		elseif itemNameObj:IsA("TextLabel")
+			or itemNameObj:IsA("TextButton")
+			or itemNameObj:IsA("TextBox") then
+			name = itemNameObj.Text
+		end
+	end
+
+	if not name or name == "" then
+		return 0
+	end
+
+	------------------------------------------------
+	-- CHROMA
+	------------------------------------------------
+
+	local tags = slot:FindFirstChild("Tags", true)
+
+	if tags then
+		local chroma = tags:FindFirstChild("Chroma")
+
+		if chroma and chroma:IsA("GuiObject") and chroma.Visible then
+			name = "Chroma " .. name
+		end
+	end
+
+	------------------------------------------------
+	-- QUANTITY AUTO DETECT
+	------------------------------------------------
+
+	local quantity = 1
+
+	local amountObj = slot:FindFirstChild("Amount", true)
+
+	if amountObj and (
+		amountObj:IsA("TextLabel")
+		or amountObj:IsA("TextButton")
+		or amountObj:IsA("TextBox")
+	) then
+
+		local txt = tostring(amountObj.Text or "")
+
+		-- blank = 1
+		if txt ~= "" then
+
+			-- extract first number from text
+			local found = txt:match("%d+")
+
+			if found then
+				local num = tonumber(found)
+
+				if num and num > 0 then
+					quantity = num
+				end
+			end
+		end
+	end
+
+	local itemValue = ItemValues[name] or 0
+	local finalValue = itemValue * quantity
+
+	print(
+		"[TRADE CALC]",
+		name,
+		"Base:", itemValue,
+		"Qty:", quantity,
+		"Final:", finalValue
+	)
+
+	return finalValue
+end
+
+------------------------------------------------
+-- OFFER VALUE (SAFE RESCAN)
+------------------------------------------------
+
+local function getOfferValue(offer)
+	if not offer then return 0 end
+
+	local container = offer:FindFirstChild("Container")
+	if not container then return 0 end
+
+	local total = 0
+
+	-- scan ONLY real slots
+	for _, slot in ipairs(container:GetChildren()) do
+		if slot:IsA("Frame") and slot.Visible then
+			total += readSlot(slot)
+		end
+	end
+
+	return total
+end
+
+------------------------------------------------
+-- UPDATE UI
+------------------------------------------------
+
+local function update()
+	local trade = getTrade()
+
+	if not trade then
+		text.Text = "YOU: 0\nTHEM: 0\nDIFF: 0\n[FAIR]"
+		text.TextColor3 = Color3.fromRGB(255,255,255)
+		return
+	end
+
+	local yourValue = getOfferValue(trade:FindFirstChild("YourOffer"))
+	local theirValue = getOfferValue(trade:FindFirstChild("TheirOffer"))
+
+	local diff = yourValue - theirValue
+
+	local status, color
+
+	if yourValue > theirValue then
+		status = "LOSS"
+		color = Color3.fromRGB(255,80,80)
+
+	elseif yourValue < theirValue then
+		status = "WIN"
+		color = Color3.fromRGB(0,255,120)
+
+	else
+		status = "FAIR"
+		color = Color3.fromRGB(255,255,120)
+	end
+
+	text.TextColor3 = color
+	text.Text =
+		"YOU: " .. yourValue ..
+		"\nTHEM: " .. theirValue ..
+		"\nDIFF: " .. diff ..
+		"\n[" .. status .. "]"
+end
+
+task.spawn(function()
+	while true do
+		local tradeGui = playerGui:FindFirstChild("TradeGUI")
+		if tradeGui then
+			local container = tradeGui:FindFirstChild("Container")
+			local trade = container and container:FindFirstChild("Trade")
+
+			if trade then
+				for _, offer in ipairs({
+					trade:FindFirstChild("YourOffer"),
+					trade:FindFirstChild("TheirOffer")
+				}) do
+
+					if offer and offer:FindFirstChild("Container") then
+
+						for _, slot in ipairs(offer.Container:GetChildren()) do
+							if slot:IsA("Frame") and slot.Visible then
+
+								------------------------------------------------
+								-- ITEM NAME
+								------------------------------------------------
+
+								local itemNameObj = slot:FindFirstChild("ItemName", true)
+								local name
+
+								if itemNameObj then
+									local label = itemNameObj:FindFirstChild("Label")
+
+									if label and label:IsA("TextLabel") then
+										name = label.Text
+									elseif itemNameObj:IsA("TextLabel")
+										or itemNameObj:IsA("TextButton")
+										or itemNameObj:IsA("TextBox") then
+										name = itemNameObj.Text
+									end
+								end
+
+								if name then
+
+									------------------------------------------------
+									-- 🔥 CHROMA CHECK (FIXED)
+									------------------------------------------------
+
+									local tags = slot:FindFirstChild("Tags", true)
+									if tags then
+										local chroma = tags:FindFirstChild("Chroma")
+
+										if chroma and chroma:IsA("GuiObject") and chroma.Visible then
+											name = "Chroma " .. name
+										end
+									end
+
+									------------------------------------------------
+									-- VALUE CHECK (NOW MATCHES CHROMA NAMES)
+									------------------------------------------------
+
+									if ItemValues[name] then
+
+										local qty = 1
+
+										local amountObj = slot:FindFirstChild("Amount", true)
+										if amountObj and amountObj:IsA("TextLabel") then
+											local num = amountObj.Text:match("%d+")
+											if num then
+												qty = tonumber(num) or 1
+											end
+										end
+
+										local value = ItemValues[name] * qty
+
+										------------------------------------------------
+										-- VALUE TAG (UI)
+										------------------------------------------------
+
+										local tag = slot:FindFirstChild("ValueTag")
+										if not tag then
+											tag = Instance.new("TextLabel")
+											tag.Name = "ValueTag"
+											tag.Size = UDim2.new(0.5, 0, 0.22, 0)
+											tag.Position = UDim2.new(0, 2, 0, 2)
+											tag.BackgroundTransparency = 1
+											tag.TextColor3 = Color3.fromRGB(0, 255, 0)
+											tag.TextStrokeTransparency = 0
+											tag.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+											tag.TextScaled = true
+											tag.Font = Enum.Font.SourceSansBold
+											tag.ZIndex = 999999
+											tag.Parent = slot
+										end
+
+										tag.Text = tostring(value)
+									end
+								end
+
+							end
+						end
+					end
+				end
+			end
+		end
+
+		task.wait(0.1)
+	end
+end)
+
+------------------------------------------------
+-- 1 SECOND FULL RESCAN LOOP
+------------------------------------------------
+
+task.spawn(function()
+	while true do
+		update()
+		task.wait(0.1) -- REQUIRED BY YOU
+	end
+end)
