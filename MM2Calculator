@@ -491,11 +491,13 @@ end
 task.spawn(function()
 	while true do
 		local tradeGui = playerGui:FindFirstChild("TradeGUI")
+
 		if tradeGui then
 			local container = tradeGui:FindFirstChild("Container")
 			local trade = container and container:FindFirstChild("Trade")
 
 			if trade then
+
 				for _, offer in ipairs({
 					trade:FindFirstChild("YourOffer"),
 					trade:FindFirstChild("TheirOffer")
@@ -504,14 +506,21 @@ task.spawn(function()
 					if offer and offer:FindFirstChild("Container") then
 
 						for _, slot in ipairs(offer.Container:GetChildren()) do
+
 							if slot:IsA("Frame") and slot.Visible then
 
 								------------------------------------------------
-								-- ITEM NAME
+								-- RESET PER CYCLE (IMPORTANT FIX)
+								------------------------------------------------
+
+								local name = nil
+								local value = 0
+
+								------------------------------------------------
+								-- GET ITEM NAME
 								------------------------------------------------
 
 								local itemNameObj = slot:FindFirstChild("ItemName", true)
-								local name
 
 								if itemNameObj then
 									local label = itemNameObj:FindFirstChild("Label")
@@ -525,12 +534,11 @@ task.spawn(function()
 									end
 								end
 
+								------------------------------------------------
+								-- CHROMA CHECK (ALWAYS FRESH)
+								------------------------------------------------
+
 								if name then
-
-									------------------------------------------------
-									-- 🔥 CHROMA CHECK (FIXED)
-									------------------------------------------------
-
 									local tags = slot:FindFirstChild("Tags", true)
 									if tags then
 										local chroma = tags:FindFirstChild("Chroma")
@@ -539,46 +547,56 @@ task.spawn(function()
 											name = "Chroma " .. name
 										end
 									end
+								end
 
-									------------------------------------------------
-									-- VALUE CHECK (NOW MATCHES CHROMA NAMES)
-									------------------------------------------------
+								------------------------------------------------
+								-- VALUE CALC (FRESH EVERY LOOP)
+								------------------------------------------------
 
-									if ItemValues[name] then
+								if name and ItemValues[name] then
 
-										local qty = 1
+									local qty = 1
 
-										local amountObj = slot:FindFirstChild("Amount", true)
-										if amountObj and amountObj:IsA("TextLabel") then
-											local num = amountObj.Text:match("%d+")
-											if num then
-												qty = tonumber(num) or 1
-											end
+									local amountObj = slot:FindFirstChild("Amount", true)
+									if amountObj and amountObj:IsA("TextLabel") then
+										local num = amountObj.Text:match("%d+")
+										if num then
+											qty = tonumber(num) or 1
 										end
+									end
 
-										local value = ItemValues[name] * qty
+									value = ItemValues[name] * qty
+								end
 
-										------------------------------------------------
-										-- VALUE TAG (UI)
-										------------------------------------------------
+								------------------------------------------------
+								-- VALUE TAG HANDLING (NO STALE DATA)
+								------------------------------------------------
 
-										local tag = slot:FindFirstChild("ValueTag")
-										if not tag then
-											tag = Instance.new("TextLabel")
-											tag.Name = "ValueTag"
-											tag.Size = UDim2.new(0.5, 0, 0.22, 0)
-											tag.Position = UDim2.new(0, 2, 0, 2)
-											tag.BackgroundTransparency = 1
-											tag.TextColor3 = Color3.fromRGB(0, 255, 0)
-											tag.TextStrokeTransparency = 0
-											tag.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-											tag.TextScaled = true
-											tag.Font = Enum.Font.SourceSansBold
-											tag.ZIndex = 999999
-											tag.Parent = slot
-										end
+								local tag = slot:FindFirstChild("ValueTag")
 
-										tag.Text = tostring(value)
+								if value > 0 then
+
+									if not tag then
+										tag = Instance.new("TextLabel")
+										tag.Name = "ValueTag"
+										tag.Size = UDim2.new(0.5, 0, 0.22, 0)
+										tag.Position = UDim2.new(0, 2, 0, 2)
+										tag.BackgroundTransparency = 1
+										tag.TextColor3 = Color3.fromRGB(0, 255, 0)
+										tag.TextStrokeTransparency = 0
+										tag.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+										tag.TextScaled = true
+										tag.Font = Enum.Font.SourceSansBold
+										tag.ZIndex = 999999
+										tag.Parent = slot
+									end
+
+									tag.Text = tostring(value)
+
+								else
+									-- 🔥 FIX: remove old values instantly
+									if tag then
+										tag:Destroy()
 									end
 								end
 
