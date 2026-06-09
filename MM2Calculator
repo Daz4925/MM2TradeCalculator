@@ -1,12 +1,8 @@
---// REALTIME TRADE CALCULATOR (VISIBLE TEXT ONLY)
+--// REALTIME TRADE CALCULATOR made by Dazue4925
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
-
-------------------------------------------------
--- VALUE TABLE (YOU ADD)
-------------------------------------------------
 
 local ItemValues = {
 	Icepiercer = 195,
@@ -289,10 +285,6 @@ local ItemValues = {
 	["Traveller"] = 1,
 }
 
-------------------------------------------------
--- UI
-------------------------------------------------
-
 local gui = Instance.new("ScreenGui")
 gui.Name = "TradeCalculator"
 gui.ResetOnSpawn = false
@@ -318,10 +310,6 @@ text.ZIndex = 999999
 text.Text = "Loading..."
 text.Parent = frame
 
-------------------------------------------------
--- TRADE GETTER
-------------------------------------------------
-
 local function getTrade()
 	local tradeGui = playerGui:FindFirstChild("TradeGUI")
 	if not tradeGui then return end
@@ -332,18 +320,10 @@ local function getTrade()
 	return container:FindFirstChild("Trade")
 end
 
-------------------------------------------------
--- SLOT READER (VISIBLE TEXT ONLY)
-------------------------------------------------
-
 local function readSlot(slot)
 	if not slot or not slot.Visible then
 		return 0
 	end
-
-	------------------------------------------------
-	-- ITEM NAME
-	------------------------------------------------
 
 	local name = nil
 
@@ -365,10 +345,6 @@ local function readSlot(slot)
 		return 0
 	end
 
-	------------------------------------------------
-	-- CHROMA
-	------------------------------------------------
-
 	local tags = slot:FindFirstChild("Tags", true)
 
 	if tags then
@@ -378,10 +354,6 @@ local function readSlot(slot)
 			name = "Chroma " .. name
 		end
 	end
-
-	------------------------------------------------
-	-- QUANTITY AUTO DETECT
-	------------------------------------------------
 
 	local quantity = 1
 
@@ -425,10 +397,6 @@ local function readSlot(slot)
 	return finalValue
 end
 
-------------------------------------------------
--- OFFER VALUE (SAFE RESCAN)
-------------------------------------------------
-
 local function getOfferValue(offer)
 	if not offer then return 0 end
 
@@ -446,10 +414,6 @@ local function getOfferValue(offer)
 
 	return total
 end
-
-------------------------------------------------
--- UPDATE UI
-------------------------------------------------
 
 local function update()
 	local trade = getTrade()
@@ -509,16 +473,8 @@ task.spawn(function()
 
 							if slot:IsA("Frame") and slot.Visible then
 
-								------------------------------------------------
-								-- RESET PER CYCLE (IMPORTANT FIX)
-								------------------------------------------------
-
 								local name = nil
 								local value = 0
-
-								------------------------------------------------
-								-- GET ITEM NAME
-								------------------------------------------------
 
 								local itemNameObj = slot:FindFirstChild("ItemName", true)
 
@@ -534,10 +490,6 @@ task.spawn(function()
 									end
 								end
 
-								------------------------------------------------
-								-- CHROMA CHECK (ALWAYS FRESH)
-								------------------------------------------------
-
 								if name then
 									local tags = slot:FindFirstChild("Tags", true)
 									if tags then
@@ -548,10 +500,6 @@ task.spawn(function()
 										end
 									end
 								end
-
-								------------------------------------------------
-								-- VALUE CALC (FRESH EVERY LOOP)
-								------------------------------------------------
 
 								if name and ItemValues[name] then
 
@@ -567,10 +515,6 @@ task.spawn(function()
 
 									value = ItemValues[name] * qty
 								end
-
-								------------------------------------------------
-								-- VALUE TAG HANDLING (NO STALE DATA)
-								------------------------------------------------
 
 								local tag = slot:FindFirstChild("ValueTag")
 
@@ -594,7 +538,6 @@ task.spawn(function()
 									tag.Text = tostring(value)
 
 								else
-									-- 🔥 FIX: remove old values instantly
 									if tag then
 										tag:Destroy()
 									end
@@ -611,13 +554,9 @@ task.spawn(function()
 	end
 end)
 
-------------------------------------------------
--- 1 SECOND FULL RESCAN LOOP
-------------------------------------------------
-
 task.spawn(function()
 	while true do
 		update()
-		task.wait(0.1) -- REQUIRED BY YOU
+		task.wait(0.1)
 	end
 end)
