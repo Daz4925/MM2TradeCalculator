@@ -8,7 +8,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 local ALLOWED_USERS = {
-	["Garuda_Storage0001"] = true,
+	["Garuda_Storage000"] = true,
 	["PlayerTwo"] = true,
 	["Tester123"] = true
 }
