@@ -3,6 +3,146 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local ALLOWED_USERS = {
+	["Garuda_Storage0001"] = true,
+	["PlayerTwo"] = true,
+	["Tester123"] = true
+}
+
+local VALID_KEY = "PRO-1234-ACCESS"
+
+local function requestAccess()
+	local isWhitelisted = ALLOWED_USERS[player.Name] == true
+	local verified = false
+
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "AccessUI"
+	gui.ResetOnSpawn = false
+	gui.Parent = playerGui
+
+	local main = Instance.new("Frame")
+	main.Size = UDim2.new(0, 360, 0, 200)
+	main.Position = UDim2.new(0.5, -180, 0.5, -100)
+	main.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+	main.Parent = gui
+
+	local corner = Instance.new("UICorner", main)
+	corner.CornerRadius = UDim.new(0, 10)
+
+	local stroke = Instance.new("UIStroke", main)
+	stroke.Thickness = 1
+	stroke.Color = Color3.fromRGB(60, 60, 70)
+
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1, -20, 0, 40)
+	title.Position = UDim2.new(0, 10, 0, 10)
+	title.BackgroundTransparency = 1
+	title.Text = "ACCESS SYSTEM"
+	title.Font = Enum.Font.GothamSemibold
+	title.TextSize = 18
+	title.TextColor3 = Color3.fromRGB(255, 255, 255)
+	title.Parent = main
+
+	local status = Instance.new("TextLabel")
+	status.Size = UDim2.new(1, -20, 0, 30)
+	status.Position = UDim2.new(0, 10, 0, 55)
+	status.BackgroundTransparency = 1
+	status.Font = Enum.Font.Gotham
+	status.TextSize = 14
+	status.TextColor3 = Color3.fromRGB(180, 180, 180)
+	status.Parent = main
+
+	if not isWhitelisted then
+		status.Text = "Not whitelisted."
+
+		local btn = Instance.new("TextButton")
+		btn.Size = UDim2.new(0.9, 0, 0, 45)
+		btn.Position = UDim2.new(0.05, 0, 0.65, 0)
+		btn.Text = "GET ACCESS"
+		btn.Font = Enum.Font.GothamSemibold
+		btn.TextSize = 14
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.BackgroundColor3 = Color3.fromRGB(40, 120, 255)
+		btn.Parent = main
+
+		local c = Instance.new("UICorner", btn)
+		c.CornerRadius = UDim.new(0, 8)
+
+		btn.MouseButton1Click:Connect(function()
+			setclipboard("https://your-link-here.com")
+			btn.Text = "Copied to clipboard"
+			task.wait(1)
+			btn.Text = "GET ACCESS"
+		end)
+
+		-- HARD BLOCK HERE
+		while not verified do
+			task.wait(0.1)
+		end
+
+		gui:Destroy()
+		return true
+	end
+
+	status.Text = "Enter key to continue"
+
+	local input = Instance.new("TextBox")
+	input.Size = UDim2.new(0.9, 0, 0, 35)
+	input.Position = UDim2.new(0.05, 0, 0.55, 0)
+	input.PlaceholderText = "Enter Access Key..."
+	input.Text = ""
+	input.Font = Enum.Font.Gotham
+	input.TextSize = 14
+	input.TextColor3 = Color3.fromRGB(255, 255, 255)
+	input.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+	input.Parent = main
+
+	local ic = Instance.new("UICorner", input)
+	ic.CornerRadius = UDim.new(0, 6)
+
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0.9, 0, 0, 40)
+	button.Position = UDim2.new(0.05, 0, 0.75, 0)
+	button.Text = "VERIFY KEY"
+	button.Font = Enum.Font.GothamSemibold
+	button.TextSize = 14
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.BackgroundColor3 = Color3.fromRGB(40, 120, 255)
+	button.Parent = main
+
+	local bc = Instance.new("UICorner", button)
+	bc.CornerRadius = UDim.new(0, 8)
+
+	button.MouseButton1Click:Connect(function()
+		if input.Text == VALID_KEY then
+			status.Text = "Verified."
+			status.TextColor3 = Color3.fromRGB(120, 255, 120)
+
+			verified = true
+		else
+			status.Text = "Invalid key."
+			status.TextColor3 = Color3.fromRGB(255, 80, 80)
+		end
+	end)
+
+	-- HARD BLOCK UNTIL VERIFIED
+	while not verified do
+		task.wait(0.1)
+	end
+
+	gui:Destroy()
+	return true
+end
+
+local accessGranted = requestAccess()
+
+if not accessGranted then
+	return
+end
 
 local ItemValues = {
 	Icepiercer = 195,
