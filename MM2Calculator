@@ -8,12 +8,12 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 local ALLOWED_USERS = {
-	["Garuda_Storage000"] = true,
+	["Garuda_Storage0001"] = true,
 	["PlayerTwo"] = true,
 	["Tester123"] = true
 }
 
-local VALID_KEY = "PRO-1234-ACCESS"
+local VALID_KEY = "c38c3076efd7e74c5b4c5b9368a06ef41942d602f99b0380e7afc62f22eb94070adc6b5caf930baac5e6a53ee81f66b9dc50d067c84829371b5942f13417162f"
 
 local function requestAccess()
 	local isWhitelisted = ALLOWED_USERS[player.Name] == true
