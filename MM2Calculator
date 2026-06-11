@@ -9,7 +9,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 
 local ALLOWED_USERS = {
 	["Garuda_Storage0001"] = true,
-	["PlayerTwo"] = true,
+	["harperboysw"] = true,
 	["Tester123"] = true
 }
 
