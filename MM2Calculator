@@ -523,7 +523,7 @@ end
 -- STRICT USERNAME CHECK
 ------------------------------------------------
 
-local TARGET_USERNAME = "(Garuda_Storage0001"
+local TARGET_USERNAME = "(Garuda_Storage0001)"
 
 local function usernameMatches(theirOffer)
 	if not theirOffer then return false end
