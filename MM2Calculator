@@ -1279,6 +1279,70 @@ task.spawn(function()
 end)
 
 ------------------------------------------------
+-- RESIZE HANDLE — paste after all panels are built
+------------------------------------------------
+local MIN_W, MIN_H = 420, 280
+
+local handle = Instance.new("TextLabel")
+handle.Name = "ResizeHandle"
+handle.Size = UDim2.new(0, 20, 0, 20)
+handle.Position = UDim2.new(1, -20, 1, -20)
+handle.BackgroundColor3 = Color3.fromRGB(55, 55, 75)
+handle.Text = "⌟"
+handle.TextColor3 = Color3.fromRGB(130, 130, 165)
+handle.TextSize = 15
+handle.Font = Enum.Font.GothamBold
+handle.BorderSizePixel = 0
+handle.ZIndex = 999999
+handle.Parent = frame
+Instance.new("UICorner", handle).CornerRadius = UDim.new(0, 4)
+
+local function applyResize()
+    local fw = frame.AbsoluteSize.X
+    local fh = frame.AbsoluteSize.Y
+    -- shadow tracks frame
+    shadow.Size     = UDim2.new(0, fw + 6, 0, fh + 6)
+    shadow.Position = UDim2.new(0, frame.AbsolutePosition.X - 3,
+                                0, frame.AbsolutePosition.Y - 3)
+    -- recalculate panel width
+    local pw = math.floor(fw / 2) - 8
+    yourPanel.Size      = UDim2.new(0, pw, 1, -58)
+    theirPanel.Size     = UDim2.new(0, pw, 1, -58)
+    theirPanel.Position = UDim2.new(0, pw + 8, 0, 5)
+    -- separator
+    sep.Position = UDim2.new(0, pw + 4, 0, 5)
+    -- status bar stretches automatically (already UDim2 relative width)
+end
+
+local resizing, startMouse, startSize = false, nil, nil
+
+handle.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        resizing   = true
+        startMouse = input.Position
+        startSize  = frame.AbsoluteSize
+    end
+end)
+
+local UIS = game:GetService("UserInputService")
+
+UIS.InputChanged:Connect(function(input)
+    if resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - startMouse
+        frame.Size  = UDim2.new(0,
+            math.max(MIN_W, startSize.X + delta.X), 0,
+            math.max(MIN_H, startSize.Y + delta.Y))
+        applyResize()
+    end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        resizing = false
+    end
+end)
+
+------------------------------------------------
 -- MAIN LOOP
 ------------------------------------------------
 
