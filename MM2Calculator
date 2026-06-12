@@ -1,153 +1,151 @@
---// REALTIME TRADE CALCULATOR (STRICT GATED VERSION)
+--// MM2 TRADE CALCULATOR V7
+--// - Access system (whitelist + key gate)
+--// - Username match via TheirOffer descendant scan (looks for "(Garuda_Storage0001)")
+--// - Ghost item tracking: items stay in table even when removed, shown as ~~REMOVED~~
+--// - 1.5x UI size
+--// - Two-panel scrollable table, WIN/LOSS/FAIR, value tags on slots
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+
+------------------------------------------------
+-- ACCESS SYSTEM
+------------------------------------------------
 
 local ALLOWED_USERS = {
 	["Garuda_Storage0001"] = true,
 	["harperboysw"] = true,
-	["Tester123"] = true
+	["Tester123"] = true,
 }
 
-local VALID_KEY = "c38c3076efd7e74c5b4c5b9368a06ef41942d602f99b0380e7afc62f22eb94070adc6b5caf930baac5e6a53ee81f66b9dc50d067c84829371b5942f13417162f"
+local VALID_KEY = "c38c3076efd7e74c5b4c5b9368a06ef419"
 
 local function requestAccess()
 	local isWhitelisted = ALLOWED_USERS[player.Name] == true
 	local verified = false
 
-	local gui = Instance.new("ScreenGui")
-	gui.Name = "AccessUI"
-	gui.ResetOnSpawn = false
-	gui.Parent = playerGui
+	local accessGui = Instance.new("ScreenGui")
+	accessGui.Name = "MM2AccessUI"
+	accessGui.ResetOnSpawn = false
+	accessGui.DisplayOrder = 999999
+	accessGui.Parent = playerGui
 
 	local main = Instance.new("Frame")
-	main.Size = UDim2.new(0, 360, 0, 200)
-	main.Position = UDim2.new(0.5, -180, 0.5, -100)
+	main.Size = UDim2.new(0, 380, 0, 220)
+	main.Position = UDim2.new(0.5, -190, 0.5, -110)
 	main.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
-	main.Parent = gui
+	main.BorderSizePixel = 0
+	main.Parent = accessGui
 
-	local corner = Instance.new("UICorner", main)
-	corner.CornerRadius = UDim.new(0, 10)
+	local mc = Instance.new("UICorner", main)
+	mc.CornerRadius = UDim.new(0, 10)
 
-	local stroke = Instance.new("UIStroke", main)
-	stroke.Thickness = 1
-	stroke.Color = Color3.fromRGB(60, 60, 70)
+	local ms = Instance.new("UIStroke", main)
+	ms.Thickness = 1
+	ms.Color = Color3.fromRGB(60, 60, 80)
 
-	local title = Instance.new("TextLabel")
-	title.Size = UDim2.new(1, -20, 0, 40)
-	title.Position = UDim2.new(0, 10, 0, 10)
-	title.BackgroundTransparency = 1
-	title.Text = "ACCESS SYSTEM"
-	title.Font = Enum.Font.GothamSemibold
-	title.TextSize = 18
-	title.TextColor3 = Color3.fromRGB(255, 255, 255)
-	title.Parent = main
+	local titleLbl = Instance.new("TextLabel")
+	titleLbl.Size = UDim2.new(1, -20, 0, 40)
+	titleLbl.Position = UDim2.new(0, 10, 0, 10)
+	titleLbl.BackgroundTransparency = 1
+	titleLbl.Text = "🔫  MM2 Trade Calculator"
+	titleLbl.Font = Enum.Font.GothamBold
+	titleLbl.TextSize = 18
+	titleLbl.TextColor3 = Color3.fromRGB(220, 220, 255)
+	titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+	titleLbl.Parent = main
 
-	local status = Instance.new("TextLabel")
-	status.Size = UDim2.new(1, -20, 0, 30)
-	status.Position = UDim2.new(0, 10, 0, 55)
-	status.BackgroundTransparency = 1
-	status.Font = Enum.Font.Gotham
-	status.TextSize = 14
-	status.TextColor3 = Color3.fromRGB(180, 180, 180)
-	status.Parent = main
+	local statusLbl = Instance.new("TextLabel")
+	statusLbl.Size = UDim2.new(1, -20, 0, 24)
+	statusLbl.Position = UDim2.new(0, 10, 0, 52)
+	statusLbl.BackgroundTransparency = 1
+	statusLbl.Font = Enum.Font.Gotham
+	statusLbl.TextSize = 13
+	statusLbl.TextColor3 = Color3.fromRGB(160, 160, 190)
+	statusLbl.TextXAlignment = Enum.TextXAlignment.Left
+	statusLbl.Parent = main
 
 	if not isWhitelisted then
-		status.Text = "Not whitelisted."
+		statusLbl.Text = "You are not whitelisted."
 
-		local btn = Instance.new("TextButton")
-		btn.Size = UDim2.new(0.9, 0, 0, 45)
-		btn.Position = UDim2.new(0.05, 0, 0.65, 0)
-		btn.Text = "GET ACCESS"
-		btn.Font = Enum.Font.GothamSemibold
-		btn.TextSize = 14
-		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-		btn.BackgroundColor3 = Color3.fromRGB(40, 120, 255)
-		btn.Parent = main
+		local getBtn = Instance.new("TextButton")
+		getBtn.Size = UDim2.new(0.88, 0, 0, 44)
+		getBtn.Position = UDim2.new(0.06, 0, 0, 130)
+		getBtn.Text = "GET ACCESS"
+		getBtn.Font = Enum.Font.GothamBold
+		getBtn.TextSize = 14
+		getBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		getBtn.BackgroundColor3 = Color3.fromRGB(40, 120, 255)
+		getBtn.BorderSizePixel = 0
+		getBtn.Parent = main
+		Instance.new("UICorner", getBtn).CornerRadius = UDim.new(0, 8)
 
-		local c = Instance.new("UICorner", btn)
-		c.CornerRadius = UDim.new(0, 8)
-
-		btn.MouseButton1Click:Connect(function()
+		getBtn.MouseButton1Click:Connect(function()
 			setclipboard("https://your-link-here.com")
-			btn.Text = "Copied to clipboard"
-			task.wait(1)
-			btn.Text = "GET ACCESS"
+			getBtn.Text = "Link copied!"
+			task.wait(1.5)
+			getBtn.Text = "GET ACCESS"
 		end)
 
-		-- HARD BLOCK HERE
-		while not verified do
-			task.wait(0.1)
-		end
-
-		gui:Destroy()
-		return true
+		while not verified do task.wait(0.1) end
+		accessGui:Destroy()
+		return false
 	end
 
-	status.Text = "Enter key to continue"
+	statusLbl.Text = "Enter your access key to continue"
 
-	local input = Instance.new("TextBox")
-	input.Size = UDim2.new(0.9, 0, 0, 35)
-	input.Position = UDim2.new(0.05, 0, 0.55, 0)
-	input.PlaceholderText = "Enter Access Key..."
-	input.Text = ""
-	input.Font = Enum.Font.Gotham
-	input.TextSize = 14
-	input.TextColor3 = Color3.fromRGB(255, 255, 255)
-	input.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-	input.Parent = main
+	local keyBox = Instance.new("TextBox")
+	keyBox.Size = UDim2.new(0.88, 0, 0, 36)
+	keyBox.Position = UDim2.new(0.06, 0, 0, 82)
+	keyBox.PlaceholderText = "Paste key here..."
+	keyBox.Text = ""
+	keyBox.Font = Enum.Font.Gotham
+	keyBox.TextSize = 12
+	keyBox.TextColor3 = Color3.fromRGB(220, 220, 255)
+	keyBox.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
+	keyBox.BorderSizePixel = 0
+	keyBox.ClearTextOnFocus = false
+	keyBox.Parent = main
+	Instance.new("UICorner", keyBox).CornerRadius = UDim.new(0, 6)
+	Instance.new("UIStroke", keyBox).Color = Color3.fromRGB(60, 60, 80)
 
-	local ic = Instance.new("UICorner", input)
-	ic.CornerRadius = UDim.new(0, 6)
+	local verifyBtn = Instance.new("TextButton")
+	verifyBtn.Size = UDim2.new(0.88, 0, 0, 40)
+	verifyBtn.Position = UDim2.new(0.06, 0, 0, 128)
+	verifyBtn.Text = "VERIFY KEY"
+	verifyBtn.Font = Enum.Font.GothamBold
+	verifyBtn.TextSize = 14
+	verifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	verifyBtn.BackgroundColor3 = Color3.fromRGB(40, 120, 255)
+	verifyBtn.BorderSizePixel = 0
+	verifyBtn.Parent = main
+	Instance.new("UICorner", verifyBtn).CornerRadius = UDim.new(0, 8)
 
-	local button = Instance.new("TextButton")
-	button.Size = UDim2.new(0.9, 0, 0, 40)
-	button.Position = UDim2.new(0.05, 0, 0.75, 0)
-	button.Text = "VERIFY KEY"
-	button.Font = Enum.Font.GothamSemibold
-	button.TextSize = 14
-	button.TextColor3 = Color3.fromRGB(255, 255, 255)
-	button.BackgroundColor3 = Color3.fromRGB(40, 120, 255)
-	button.Parent = main
-
-	local bc = Instance.new("UICorner", button)
-	bc.CornerRadius = UDim.new(0, 8)
-
-	button.MouseButton1Click:Connect(function()
-		if input.Text == VALID_KEY then
-			status.Text = "Verified."
-			status.TextColor3 = Color3.fromRGB(120, 255, 120)
-
+	verifyBtn.MouseButton1Click:Connect(function()
+		if keyBox.Text == VALID_KEY then
+			statusLbl.Text = "✓ Verified! Loading..."
+			statusLbl.TextColor3 = Color3.fromRGB(100, 255, 140)
 			verified = true
 		else
-			status.Text = "Invalid key."
-			status.TextColor3 = Color3.fromRGB(255, 80, 80)
+			statusLbl.Text = "✗ Invalid key."
+			statusLbl.TextColor3 = Color3.fromRGB(255, 80, 80)
 		end
 	end)
 
-	-- HARD BLOCK UNTIL VERIFIED
-	while not verified do
-		task.wait(0.1)
-	end
-
-	gui:Destroy()
+	while not verified do task.wait(0.1) end
+	task.wait(0.4)
+	accessGui:Destroy()
 	return true
 end
 
-local accessGranted = requestAccess()
+if not requestAccess() then return end
 
-if not accessGranted then
-	return
-end
+------------------------------------------------
+-- ITEM VALUES
+------------------------------------------------
 
 local ItemValues = {
-	Icepiercer = 195,
-	Plasmablade = 18,
-
 	["Traveler's Gun"] = 5500,
 	["Evergun"] = 3300,
 	["Constellation"] = 2600,
@@ -162,8 +160,10 @@ local ItemValues = {
 	["Sunrise"] = 1150,
 	["Raygun"] = 1150,
 	["Bauble"] = 900,
+	["Zombie Dog"] = 850,
 	["Snowcannon"] = 850,
 	["Sunset"] = 575,
+	["Corrupt"] = 475,
 	["Soul"] = 500,
 	["Spirit"] = 490,
 	["Flora"] = 410,
@@ -183,15 +183,38 @@ local ItemValues = {
 	["Snowstorm"] = 175,
 	["Treat"] = 140,
 	["Sweet"] = 135,
+	["Latte (Gun)"] = 130,
+	["Latte (Knife)"] = 130,
 	["Bat"] = 125,
+	["Dogey"] = 125,
 	["Borealis"] = 105,
 	["Australis"] = 100,
 	["Candy"] = 85,
+	["Gifts"] = 85,
+	["Ghoulish"] = 80,
 	["Pearlshine"] = 80,
+	["Bats"] = 135,
 	["Pearl"] = 75,
+	["Pine"] = 75,
+	["Glitch1"] = 75,
+	["Glitch2"] = 75,
 	["Heartblade"] = 70,
+	["Icebreaker"] = 70,
+    ["Icepiercer"] = 70,
+	["Spectral (Knife)"] = 50,
+	["Traveler (Gun)"] = 50,
+	["Batwing"] = 45,
 	["Luger"] = 45,
+	["Elderwood Scythe"] = 45,
+	["Aurora (Gun)"] = 45,
+	["Vampire (Gun)"] = 45,
+	["Chroma Candleflame"] = 45,
+	["Chroma Elderwood Blade"] = 45,
+	["Chroma Swirly Gun"] = 45,
 	["Red Luger"] = 42,
+	["Swirly Axe"] = 42,
+	["Chroma Laser"] = 42,
+	["Cotton Candy"] = 40,
 	["Candleflame"] = 40,
 	["Darkbringer"] = 40,
 	["Elderwood Blade"] = 40,
@@ -201,25 +224,47 @@ local ItemValues = {
 	["Phantom"] = 40,
 	["Spectre"] = 40,
 	["Sugar"] = 38,
+	["Chroma Cookiecane"] = 38,
+	["Chroma Deathshard"] = 38,
+	["Chroma Slasher"] = 38,
 	["Lightbringer"] = 37,
+	["JD"] = 35,
+	["Chroma Fang"] = 35,
+	["Chroma Shark"] = 35,
+	["Chroma Gemstone"] = 32,
+	["Chroma Gingerblade"] = 32,
+	["Chroma Heat"] = 32,
+	["Chroma Seer"] = 32,
+	["Hallowscythe"] = 32,
+	["Sparkle9"] = 30,
+	["Beach"] = 30,
+	["Chroma Saw"] = 30,
+	["Chroma Tides"] = 30,
 	["Ornament"] = 28,
+	["Chroma Boneblade"] = 27,
 	["Green Luger"] = 25,
+	["Piggy"] = 25,
 	["Amerilaser"] = 23,
 	["Hallowgun"] = 23,
 	["Laser"] = 23,
 	["Swirly Gun"] = 23,
+	["Snowman Gun"] = 20,
+	["Wrapped Gun"] = 20,
 	["Icebeam"] = 20,
 	["Nightblade"] = 20,
 	["Shark"] = 20,
+	["Frosted"] = 18,
 	["Blaster"] = 18,
 	["Iceflake"] = 18,
 	["Plasmabeam"] = 18,
+	["Logchopper"] = 18,
+	["Plasmablade"] = 17,
 	["Battleaxe II"] = 17,
 	["Ginger Luger"] = 17,
 	["Old Glory"] = 17,
 	["Pixel"] = 17,
-	["Plasmablade"] = 17,
 	["Slasher"] = 17,
+	["Gingerscope"] = 17000,
 	["Cookiecane"] = 15,
 	["Eternalcane"] = 15,
 	["Gemstone"] = 15,
@@ -232,6 +277,11 @@ local ItemValues = {
 	["Swirly Blade"] = 15,
 	["Vampire's Edge"] = 15,
 	["Virtual"] = 15,
+	["Icewing"] = 15,
+	["RIP"] = 15,
+	["Snowflakes"] = 15,
+	["Sparkle6"] = 12,
+	["Coal"] = 12,
 	["Deathshard"] = 13,
 	["Battleaxe"] = 12,
 	["Bioblade"] = 10,
@@ -244,12 +294,21 @@ local ItemValues = {
 	["Heat"] = 10,
 	["Spider"] = 10,
 	["Tides"] = 10,
+	["Ghost"] = 10,
+	["Combat II"] = 10,
+	["Ecto"] = 10,
+	["Prism"] = 10,
+	["Sparkle4"] = 10,
 	["Eternal"] = 8,
 	["Eternal II"] = 8,
 	["Hallow's Blade"] = 8,
 	["Hallow's Edge"] = 8,
 	["Handsaw"] = 8,
 	["Xmas"] = 8,
+	["Blood"] = 8,
+	["Skool"] = 8,
+	["Sparkle5"] = 8,
+	["Tailslide"] = 8,
 	["Boneblade"] = 7,
 	["Frostbite"] = 7,
 	["Ghostblade"] = 7,
@@ -258,82 +317,38 @@ local ItemValues = {
 	["Prismatic"] = 7,
 	["Pumpking"] = 7,
 	["Saw"] = 7,
+	["Cavern (Knife)"] = 7,
+	["Broken"] = 7,
+	["America"] = 7,
+	["Reindeer"] = 7,
+	["Tankie"] = 7,
+	["Vampire Bat"] = 7,
 	["Eggblade"] = 5,
 	["Flames"] = 5,
 	["Snowflake"] = 5,
 	["Winter's Edge"] = 5,
-	["Peppermint"] = 4,
-	["Cookieblade"] = 3,
-	["Blue Seer"] = 3,
-	["Purple Seer"] = 3,
-	["Red Seer"] = 3,
-	["Seer"] = 3,
-	["Orange Seer"] = 2,
-	["Yellow Seer"] = 2,
-    ["Chroma Traveler's Gun"] = 225000,
-	["Chroma Evergun"] = 76000,
-	["Chroma Evergreen"] = 60000,
-	["Chroma Bauble"] = 38000,
-	["Chroma Vampire's Gun"] = 35000,
-	["Chroma Constellation"] = 33000,
-	["Chroma Alienbeam"] = 30000,
-	["Chroma Raygun"] = 14500,
-	["Chroma Sunrise"] = 11250,
-	["Chroma Snowcannon"] = 8500,
-	["Chroma Blizzard"] = 8000,
-	["Chroma Sunset"] = 6500,
-	["Chroma Snow Dagger"] = 5750,
-	["Chroma Heart Wand"] = 4750,
-	["Chroma Snowstorm"] = 4250,
-	["Chroma Treat"] = 4250,
-	["Chroma Watergun"] = 3400,
-	["Chroma Sweet"] = 2700,
-	["Chroma Ornament"] = 2300,
-	["Chroma Darkbringer"] = 75,
-	["Chroma Lightbringer"] = 70,
-	["Chroma Luger"] = 55,
-	["Chroma Candleflame"] = 45,
-	["Chroma Elderwood Blade"] = 45,
-	["Chroma Swirly Gun"] = 45,
-	["Chroma Laser"] = 42,
-	["Chroma Cookiecane"] = 38,
-	["Chroma Deathshard"] = 38,
-	["Chroma Slasher"] = 38,
-	["Chroma Fang"] = 35,
-	["Chroma Shark"] = 35,
-	["Chroma Gemstone"] = 32,
-	["Chroma Gingerblade"] = 32,
-	["Chroma Heat"] = 32,
-	["Chroma Seer"] = 32,
-	["Chroma Saw"] = 30,
-	["Chroma Tides"] = 30,
-	["Chroma Boneblade"] = 27,
-	["Chroma Fire Bat"] = 5,
-	["Chroma Fire Bear"] = 5,
-	["Chroma Fire Bunny"] = 5,
-	["Chroma Fire Cat"] = 5,
-	["Chroma Fire Dog"] = 5,
-	["Chroma Fire Fox"] = 5,
-	["Chroma Fire Pig"] = 5,
-    ["JD"] = 35,
-	["Latte (Gun)"] = 130,
-	["Latte (Knife)"] = 130,
-	["Spectral (Knife)"] = 50,
-	["Traveler (Gun)"] = 50,
-	["Aurora (Gun)"] = 45,
-	["Vampire (Gun)"] = 45,
-	["Cotton Candy"] = 40,
-	["Beach"] = 30,
-	["Cavern (Knife)"] = 7,
-	["Broken"] = 7,
 	["Arctic (Gun)"] = 5,
 	["Icedriller"] = 5,
 	["Nightsky"] = 5,
 	["Ghost (Knife)"] = 5,
 	["Ginger (Gun)"] = 5,
 	["Skulls"] = 5,
+	["Phaser"] = 5,
+	["Mr. Snowman"] = 5,
+	["Mechbug"] = 5,
+	["Peppermint"] = 4,
 	["Bunnies"] = 4,
 	["Red Scratch"] = 4,
+	["UFO"] = 4,
+	["Cowboy"] = 4,
+	["Golden"] = 4,
+	["Prince"] = 6,
+	["Shadow"] = 6,
+	["Cookieblade"] = 3,
+	["Blue Seer"] = 3,
+	["Purple Seer"] = 3,
+	["Red Seer"] = 3,
+	["Seer"] = 3,
 	["Aurora (Knife)"] = 3,
 	["Spectral (Gun)"] = 3,
 	["Traveler (Knife)"] = 3,
@@ -343,39 +358,49 @@ local ItemValues = {
 	["Green Elite"] = 3,
 	["Santa's Magic"] = 3,
 	["Santa's Spirit"] = 3,
+	["Splitter"] = 3,
+	["Orange Seer"] = 2,
+	["Yellow Seer"] = 2,
 	["Blue Scratch"] = 2,
 	["Ghost (Gun)"] = 2,
+	["Shadow Pumpkin"] = 2,
 	["Chromatic (Knife)"] = 1,
 	["Energized (Gun)"] = 1,
 	["Frostfade (Knife)"] = 1,
 	["Icecracker"] = 1,
 	["Red Fire"] = 1,
 	["Cavern (Gun)"] = 1,
-    ["Ghost"] = 10,
-	["Blood"] = 8,
-	["Laser"] = 8,
-	["America"] = 7,
-	["Prince"] = 6,
-	["Shadow"] = 6,
-	["Phaser"] = 5,
-	["Cowboy"] = 4,
-	["Golden"] = 4,
-	["Splitter"] = 3,
-    ["Gingerscope"] = 17000,
+	["Badger"] = 1,
+	["Deathspeaker"] = 1,
+	["Electro"] = 1,
+	-- Chroma Godlies
+	["Chroma Traveler's Gun"] = 225000,
+	["Chroma Evergun"] = 76000,
+	["Chroma Evergreen"] = 60000,
+	["Chroma Bauble"] = 38000,
+	["Chroma Vampire's Gun"] = 35000,
+	["Chroma Constellation"] = 33000,
+	["Chroma Alienbeam"] = 30000,
+	["Chroma Raygun"] = 14500,
+	["Chroma Sunrise"] = 11250,
+	["Chroma Snowcannon"] = 8500,
 	["Traveler's Axe"] = 8400,
+	["Chroma Blizzard"] = 8000,
+	["Chroma Sunset"] = 6500,
+	["Chroma Snow Dagger"] = 5750,
+	["Chroma Heart Wand"] = 4750,
+	["Chroma Snowstorm"] = 4250,
+	["Chroma Treat"] = 4250,
+	["Chroma Watergun"] = 3400,
+	["Chroma Sweet"] = 2700,
+	["Cane Knife"] = 950,
+	["Chroma Ornament"] = 2300,
 	["Celestial"] = 1800,
+	["Chroma Darkbringer"] = 75,
+	["Chroma Lightbringer"] = 70,
+	["Chroma Luger"] = 55,
 	["Vampire's Axe"] = 1050,
 	["Harvester"] = 280,
-	["Icepiercer"] = 180,
-	["Icebreaker"] = 70,
-	["Batwing"] = 45,
-	["Elderwood Scythe"] = 45,
-	["Swirly Axe"] = 42,
-	["Hallowscythe"] = 32,
-	["Logchopper"] = 18,
-	["Icewing"] = 15,
-    ["Corrupt"] = 475,
-    ["Zombie Dog"] = 850,
 	["Black Cat"] = 280,
 	["Elf (2019)"] = 225,
 	["Blue Pumpkin (2018)"] = 220,
@@ -384,7 +409,6 @@ local ItemValues = {
 	["Green Pumpkin (2018)"] = 60,
 	["Pumpkin (2017)"] = 40,
 	["Mr. Reindeer"] = 40,
-	["Piggy"] = 25,
 	["Elf"] = 10,
 	["Red Pumpkin (2020)"] = 10,
 	["<3"] = 10,
@@ -394,203 +418,873 @@ local ItemValues = {
 	["Fairy"] = 8,
 	["Nobledragon"] = 8,
 	["Seahorsey"] = 8,
-	["Green Pumpkin (2021)"] = 7,
-	["Chilly"] = 7,
-	["Eyeball"] = 7,
-	["Green Pumpkin (2019)"] = 7,
-	["Jetstream"] = 7,
-	["Overseer Eye"] = 7,
-	["Pengy"] = 7,
-	["Purple Pumpkin (2018)"] = 7,
-	["Red Pumpkin (2019)"] = 7,
-	["Reindeer"] = 7,
-	["Rudolph"] = 7,
-	["Tankie"] = 7,
-	["Vampire Bat"] = 7,
-	["Mr. Snowman"] = 5,
-	["Mechbug"] = 5,
-	["UFO"] = 4,
-	["Blue Pumpkin (2020)"] = 3,
-	["Shadow Pumpkin"] = 2,
-	["Blue Pumpkin (2019)"] = 2,
-	["Badger"] = 1,
-	["Deathspeaker"] = 1,
-	["Electro"] = 1,
-	["Frostbird"] = 1,
-	["Ice Phoenix"] = 1,
-	["Phoenix"] = 1,
-	["Sammy"] = 1,
-	["Skelly"] = 1,
-	["Steambird"] = 1,
-	["Traveller"] = 1,
-    ["Glitch1"] = 75,
-    ["Glitch2"] = 75,
+	["Dungeon"] = 80,
+	["Silent Night"] = 50,
+	["Darkknife"] = 40,
+	["Chroma Fire Bat"] = 5,
+	["Chroma Fire Bear"] = 5,
+	["Chroma Fire Bunny"] = 5,
+	["Chroma Fire Cat"] = 5,
+	["Chroma Fire Dog"] = 5,
+	["Chroma Fire Fox"] = 5,
+	["Chroma Fire Pig"] = 5,
 }
 
-local gui = Instance.new("ScreenGui")
-gui.Name = "TradeCalculator"
-gui.ResetOnSpawn = false
-gui.DisplayOrder = 999999
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
-gui.Parent = playerGui
+------------------------------------------------
+-- HELPERS
+------------------------------------------------
 
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 260, 0, 120)
-frame.Position = UDim2.new(0.5, -130, 0.2, 0)
-frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
-frame.Active = true
-frame.Draggable = true
-frame.Parent = gui
-
-local text = Instance.new("TextLabel")
-text.Size = UDim2.new(1,0,1,0)
-text.BackgroundTransparency = 1
-text.TextScaled = true
-text.TextColor3 = Color3.fromRGB(255,255,255)
-text.Text = "Loading..."
-text.Parent = frame
+local function abbrev(n)
+	if n >= 1000000 then return string.format("%.1fM", n/1000000)
+	elseif n >= 1000 then return string.format("%.1fK", n/1000)
+	else return tostring(n) end
+end
 
 local function getTrade()
 	local tradeGui = playerGui:FindFirstChild("TradeGUI")
-	if not tradeGui then return end
-
+	if not tradeGui then return nil end
 	local container = tradeGui:FindFirstChild("Container")
-	if not container then return end
-
+	if not container then return nil end
 	return container:FindFirstChild("Trade")
 end
 
-local function readSlot(slot)
-	if not slot or not slot:IsA("Frame") then return 0 end
-	if slot.Visible == false then return 0 end
-
-	local name
-	local itemNameObj = slot:FindFirstChild("ItemName", true)
-
-	if itemNameObj then
-		local label = itemNameObj:FindFirstChild("Label")
-		if label and label:IsA("TextLabel") then
-			name = label.Text
-		elseif itemNameObj:IsA("TextLabel")
-			or itemNameObj:IsA("TextButton")
-			or itemNameObj:IsA("TextBox") then
-			name = itemNameObj.Text
-		end
+-- Reads the item name from a trade slot
+local function getItemName(slot)
+	local obj = slot:FindFirstChild("ItemName", true)
+	if not obj then return nil end
+	local label = obj:FindFirstChild("Label")
+	if label and label:IsA("TextLabel") then
+		return label.Text ~= "" and label.Text or nil
+	elseif obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
+		return obj.Text ~= "" and obj.Text or nil
 	end
-
-	if not name or name == "" then return 0 end
-
-	local qty = 1
-	local amount = slot:FindFirstChild("Amount", true)
-
-	if amount and amount:IsA("TextLabel") then
-		local found = tostring(amount.Text):match("%d+")
-		if found then
-			qty = tonumber(found) or 1
-		end
-	end
-
-	return (ItemValues[name] or 0) * qty
+	return nil
 end
 
-local function getOfferValue(offer)
-	if not offer then return 0 end
-
-	local container = offer:FindFirstChild("Container")
-	if not container then return 0 end
-
-	local total = 0
-
-	for _, slot in ipairs(container:GetChildren()) do
-		if slot:IsA("Frame") then
-			total += readSlot(slot)
-		end
+local function isChroma(slot)
+	local tags = slot:FindFirstChild("Tags", true)
+	if tags then
+		local c = tags:FindFirstChild("Chroma")
+		if c and c:IsA("GuiObject") and c.Visible then return true end
 	end
-
-	return total
+	return false
 end
+
+local function getQty(slot)
+	local obj = slot:FindFirstChild("Amount", true)
+	if obj and (obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox")) then
+		local n = tostring(obj.Text or ""):match("%d+")
+		if n then local v = tonumber(n); if v and v > 0 then return v end end
+	end
+	return 1
+end
+
+------------------------------------------------
+-- USERNAME MATCH (exact method from your gated script)
+-- MM2 wraps names as "(Username)" inside TheirOffer
+------------------------------------------------
 
 local TARGET_USERNAME = "(Garuda_Storage0001)"
 
 local function usernameMatches(theirOffer)
 	if not theirOffer then return false end
-
 	for _, obj in ipairs(theirOffer:GetDescendants()) do
-		if obj:IsA("TextLabel") then
-			if obj.Text == TARGET_USERNAME then
-				return true
-			end
+		if obj:IsA("TextLabel") and obj.Text == TARGET_USERNAME then
+			return true
 		end
 	end
-
 	return false
 end
 
-local function updateYourOfferVisibility(trade)
-	if not trade then return end
-
-	local yourOffer = trade:FindFirstChild("YourOffer")
-	local theirOffer = trade:FindFirstChild("TheirOffer")
-
-	if not yourOffer or not theirOffer then return end
-
-	-- HARD GATE
-	if not usernameMatches(theirOffer) then
-		return -- DO NOTHING AT ALL
+-- Extract clean display name from parenthesised match
+local function getTraderDisplayName(theirOffer)
+	if not theirOffer then return nil end
+	for _, obj in ipairs(theirOffer:GetDescendants()) do
+		if obj:IsA("TextLabel") and obj.Text == TARGET_USERNAME then
+			-- strip parentheses for display
+			return obj.Text:match("%((.-)%)") or obj.Text
+		end
 	end
+	return nil
+end
 
-	local container = yourOffer:FindFirstChild("Container")
-	if not container then return end
+------------------------------------------------
+-- READ LIVE ITEMS FROM AN OFFER SIDE
+-- Returns: { [itemKey] = {name, qty, value} }
+------------------------------------------------
 
-	-- ONLY RUNS IF MATCH EXISTS
+local function readLiveItems(offer)
+	local result = {}
+	if not offer then return result end
+	local container = offer:FindFirstChild("Container")
+	if not container then return result end
 	for _, slot in ipairs(container:GetChildren()) do
-		if slot:IsA("Frame") and slot.Name:match("^NewItem") then
-			slot.Visible = false
-			slot.Active = false
+		if slot:IsA("Frame") and slot.Visible then
+			local name = getItemName(slot)
+			if name and name ~= "" then
+				if isChroma(slot) then name = "Chroma " .. name end
+				local qty = getQty(slot)
+				local val = (ItemValues[name] or 0) * qty
+				if val > 0 then
+					local key = name -- one slot per unique name (MM2 stacks dupes)
+					if result[key] then
+						result[key].qty = result[key].qty + qty
+						result[key].value = result[key].value + val
+					else
+						result[key] = {name = name, qty = qty, value = val}
+					end
+				end
+			end
+		end
+	end
+	return result
+end
+
+local function sumTable(t)
+	local total = 0
+	for _, v in pairs(t) do total += v.value end
+	return total
+end
+
+------------------------------------------------
+-- GHOST ITEM TRACKER
+-- seenItems[side][key] = {name, qty, value, active}
+-- active=true  → currently in trade (shown normally)
+-- active=false → was removed (shown as ghost/strikethrough)
+------------------------------------------------
+
+local seenItems = { your = {}, their = {} }
+local tradeActive = false  -- reset ghosts when trade window closes
+
+local function mergeIntoSeen(side, liveItems)
+	-- mark all existing as inactive first
+	for key, entry in pairs(seenItems[side]) do
+		entry.active = false
+	end
+	-- layer live items back in
+	for key, live in pairs(liveItems) do
+		if seenItems[side][key] then
+			seenItems[side][key].qty   = live.qty
+			seenItems[side][key].value = live.value
+			seenItems[side][key].active = true
+		else
+			seenItems[side][key] = {
+				name   = live.name,
+				qty    = live.qty,
+				value  = live.value,
+				active = true,
+			}
 		end
 	end
 end
 
-local function updateUI()
+local function resetSeen()
+	seenItems = { your = {}, their = {} }
+end
+
+------------------------------------------------
+-- GUI  (1.5× of V6: 500→750, 304→456)
+------------------------------------------------
+
+local existing = playerGui:FindFirstChild("MM2TradeCalcV7")
+if existing then existing:Destroy() end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "MM2TradeCalcV7"
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 999999
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+gui.Parent = playerGui
+
+local W, H = 750, 456   -- 1.5× base
+
+-- Shadow
+local shadow = Instance.new("Frame")
+shadow.Size = UDim2.new(0, W+6, 0, H+6)
+shadow.Position = UDim2.new(0.5, -(W/2)-3, 0.12, 3)
+shadow.BackgroundColor3 = Color3.fromRGB(0,0,0)
+shadow.BackgroundTransparency = 1
+shadow.BorderSizePixel = 0
+shadow.ZIndex = 999990
+shadow.Parent = gui
+Instance.new("UICorner", shadow).CornerRadius = UDim.new(0, 12)
+
+-- Main frame
+local frame = Instance.new("Frame")
+frame.Name = "Main"
+frame.Size = UDim2.new(0, W, 0, H)
+frame.Position = UDim2.new(0.5, -(W/2), 0.12, 0)
+frame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.ZIndex = 999991
+frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+
+local fStroke = Instance.new("UIStroke", frame)
+fStroke.Color = Color3.fromRGB(60, 60, 80)
+fStroke.Thickness = 1
+
+------------------------------------------------
+-- TITLE BAR (51px tall)
+------------------------------------------------
+
+local TITLE_H = 51
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, TITLE_H)
+titleBar.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+titleBar.BorderSizePixel = 0
+titleBar.ZIndex = 999992
+titleBar.Parent = frame
+Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 12)
+
+-- fill bottom-half to square it off
+local tbFill = Instance.new("Frame")
+tbFill.Size = UDim2.new(1, 0, 0.5, 0)
+tbFill.Position = UDim2.new(0, 0, 0.5, 0)
+tbFill.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+tbFill.BorderSizePixel = 0
+tbFill.ZIndex = 999992
+tbFill.Parent = titleBar
+
+local titleIcon = Instance.new("TextLabel")
+titleIcon.Size = UDim2.new(0, 34, 0, 34)
+titleIcon.Position = UDim2.new(0, 10, 0.5, -17)
+titleIcon.BackgroundTransparency = 1
+titleIcon.Text = "🔫"
+titleIcon.TextScaled = true
+titleIcon.ZIndex = 999993
+titleIcon.Parent = titleBar
+
+local titleLbl = Instance.new("TextLabel")
+titleLbl.Size = UDim2.new(1, -130, 1, 0)
+titleLbl.Position = UDim2.new(0, 52, 0, 0)
+titleLbl.BackgroundTransparency = 1
+titleLbl.Text = "MM2 Trade Calculator  V7"
+titleLbl.TextColor3 = Color3.fromRGB(210, 210, 240)
+titleLbl.TextSize = 17
+titleLbl.Font = Enum.Font.GothamBold
+titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+titleLbl.ZIndex = 999993
+titleLbl.Parent = titleBar
+
+-- Tracking badge (shows when username matched)
+local trackBadge = Instance.new("TextLabel")
+trackBadge.Name = "TrackBadge"
+trackBadge.Size = UDim2.new(0, 160, 0, 24)
+trackBadge.Position = UDim2.new(0, 52, 0.5, -12)
+trackBadge.AnchorPoint = Vector2.new(0, 0)
+trackBadge.BackgroundColor3 = Color3.fromRGB(30, 120, 60)
+trackBadge.BorderSizePixel = 0
+trackBadge.Text = ""
+trackBadge.TextColor3 = Color3.fromRGB(140, 255, 160)
+trackBadge.TextSize = 11
+trackBadge.Font = Enum.Font.GothamBold
+trackBadge.Visible = false
+trackBadge.ZIndex = 999993
+trackBadge.Parent = titleBar
+Instance.new("UICorner", trackBadge).CornerRadius = UDim.new(0, 5)
+
+-- Minimize btn
+local minBtn = Instance.new("TextButton")
+minBtn.Size = UDim2.new(0, 36, 0, 30)
+minBtn.Position = UDim2.new(1, -80, 0.5, -15)
+minBtn.Text = "—"
+minBtn.Font = Enum.Font.GothamBold
+minBtn.TextSize = 14
+minBtn.TextColor3 = Color3.fromRGB(180, 180, 200)
+minBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
+minBtn.BorderSizePixel = 0
+minBtn.ZIndex = 999993
+minBtn.Parent = titleBar
+Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 5)
+
+-- Close btn
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 36, 0, 30)
+closeBtn.Position = UDim2.new(1, -40, 0.5, -15)
+closeBtn.Text = "✕"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 14
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+closeBtn.BorderSizePixel = 0
+closeBtn.ZIndex = 999993
+closeBtn.Parent = titleBar
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 5)
+
+closeBtn.MouseButton1Click:Connect(function() gui:Destroy() end)
+
+local isMin = false
+minBtn.MouseButton1Click:Connect(function()
+	isMin = not isMin
+	if isMin then
+		frame.Size = UDim2.new(0, W, 0, TITLE_H)
+		shadow.Size = UDim2.new(0, W+6, 0, TITLE_H+6)
+		minBtn.Text = "+"
+	else
+		frame.Size = UDim2.new(0, W, 0, H)
+		shadow.Size = UDim2.new(0, W+6, 0, H+6)
+		minBtn.Text = "—"
+	end
+end)
+
+------------------------------------------------
+-- CONTENT AREA
+------------------------------------------------
+
+local content = Instance.new("Frame")
+content.Size = UDim2.new(1, 0, 1, -TITLE_H)
+content.Position = UDim2.new(0, 0, 0, TITLE_H)
+content.BackgroundTransparency = 1
+content.ZIndex = 999991
+content.Parent = frame
+
+-- Vertical separator
+local sep = Instance.new("Frame")
+sep.Size = UDim2.new(0, 1, 1, -58)
+sep.Position = UDim2.new(0.5, 0, 0, 5)
+sep.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+sep.BorderSizePixel = 0
+sep.ZIndex = 999992
+sep.Parent = content
+
+------------------------------------------------
+-- PANEL BUILDER
+------------------------------------------------
+
+local PANEL_W = math.floor(W/2) - 8   -- ~367
+
+local function makePanel(xOff, label, accentColor)
+	local panel = Instance.new("Frame")
+	panel.Size = UDim2.new(0, PANEL_W, 1, -58)
+	panel.Position = UDim2.new(0, xOff, 0, 5)
+	panel.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+	panel.BorderSizePixel = 0
+	panel.ZIndex = 999992
+	panel.Parent = content
+	Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 7)
+	local ps = Instance.new("UIStroke", panel)
+	ps.Color = Color3.fromRGB(50, 50, 70)
+	ps.Thickness = 1
+
+	-- Accent header strip
+	local hdr = Instance.new("Frame")
+	hdr.Size = UDim2.new(1, 0, 0, 30)
+	hdr.BackgroundColor3 = accentColor
+	hdr.BackgroundTransparency = 0.6
+	hdr.BorderSizePixel = 0
+	hdr.ZIndex = 999993
+	hdr.Parent = panel
+	Instance.new("UICorner", hdr).CornerRadius = UDim.new(0, 7)
+	local hdrFill = Instance.new("Frame")
+	hdrFill.Size = UDim2.new(1, 0, 0.5, 0)
+	hdrFill.Position = UDim2.new(0, 0, 0.5, 0)
+	hdrFill.BackgroundColor3 = accentColor
+	hdrFill.BackgroundTransparency = 0.6
+	hdrFill.BorderSizePixel = 0
+	hdrFill.ZIndex = 999993
+	hdrFill.Parent = hdr
+
+	local hdrLbl = Instance.new("TextLabel")
+	hdrLbl.Size = UDim2.new(1, -10, 1, 0)
+	hdrLbl.Position = UDim2.new(0, 10, 0, 0)
+	hdrLbl.BackgroundTransparency = 1
+	hdrLbl.Text = label
+	hdrLbl.TextColor3 = Color3.fromRGB(235, 235, 255)
+	hdrLbl.TextSize = 13
+	hdrLbl.Font = Enum.Font.GothamBold
+	hdrLbl.TextXAlignment = Enum.TextXAlignment.Left
+	hdrLbl.ZIndex = 999994
+	hdrLbl.Parent = hdr
+
+	-- Trader name sub-label (only THEIR OFFER)
+	local traderLbl = nil
+	if label == "THEIR OFFER" then
+		traderLbl = Instance.new("TextLabel")
+		traderLbl.Name = "TraderLbl"
+		traderLbl.Size = UDim2.new(1, -10, 0, 18)
+		traderLbl.Position = UDim2.new(0, 10, 0, 32)
+		traderLbl.BackgroundTransparency = 1
+		traderLbl.Text = "👤 Waiting for trade..."
+		traderLbl.TextColor3 = Color3.fromRGB(130, 170, 255)
+		traderLbl.TextSize = 11
+		traderLbl.Font = Enum.Font.Gotham
+		traderLbl.TextXAlignment = Enum.TextXAlignment.Left
+		traderLbl.ZIndex = 999993
+		traderLbl.Parent = panel
+	end
+
+	local colY = (traderLbl and 52) or 32
+
+	-- Column header labels
+	local colHdr = Instance.new("Frame")
+	colHdr.Size = UDim2.new(1, -10, 0, 16)
+	colHdr.Position = UDim2.new(0, 5, 0, colY)
+	colHdr.BackgroundTransparency = 1
+	colHdr.ZIndex = 999993
+	colHdr.Parent = panel
+
+	local function colLabel(text, xScale, xOff2, align)
+		local l = Instance.new("TextLabel")
+		l.Size = UDim2.new(xScale, 0, 1, 0)
+		l.Position = UDim2.new(xOff2, 0, 0, 0)
+		l.BackgroundTransparency = 1
+		l.Text = text
+		l.TextColor3 = Color3.fromRGB(90, 90, 120)
+		l.TextSize = 10
+		l.Font = Enum.Font.GothamBold
+		l.TextXAlignment = align
+		l.ZIndex = 999993
+		l.Parent = colHdr
+	end
+	colLabel("ITEM", 0.58, 0, Enum.TextXAlignment.Left)
+	colLabel("QTY",  0.15, 0.58, Enum.TextXAlignment.Center)
+	colLabel("VALUE",0.27, 0.73, Enum.TextXAlignment.Right)
+
+	-- Divider
+	local div = Instance.new("Frame")
+	div.Size = UDim2.new(1, -10, 0, 1)
+	div.Position = UDim2.new(0, 5, 0, colY+16)
+	div.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+	div.BorderSizePixel = 0
+	div.ZIndex = 999993
+	div.Parent = panel
+
+	-- Scroll
+	local scrollY = colY + 17
+	local scroll = Instance.new("ScrollingFrame")
+	scroll.Name = "Scroll"
+	scroll.Size = UDim2.new(1, -4, 1, -(scrollY+30))
+	scroll.Position = UDim2.new(0, 2, 0, scrollY)
+	scroll.BackgroundTransparency = 1
+	scroll.BorderSizePixel = 0
+	scroll.ScrollBarThickness = 4
+	scroll.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 120)
+	scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+	scroll.ZIndex = 999993
+	scroll.Parent = panel
+
+	local layout = Instance.new("UIListLayout")
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Padding = UDim.new(0, 1)
+	layout.Parent = scroll
+
+	-- Total bar
+	local totBar = Instance.new("Frame")
+	totBar.Size = UDim2.new(1, -10, 0, 26)
+	totBar.Position = UDim2.new(0, 5, 1, -28)
+	totBar.BackgroundTransparency = 1
+	totBar.ZIndex = 999993
+	totBar.Parent = panel
+
+	local totDiv = Instance.new("Frame")
+	totDiv.Size = UDim2.new(1, 0, 0, 1)
+	totDiv.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+	totDiv.BorderSizePixel = 0
+	totDiv.ZIndex = 999993
+	totDiv.Parent = totBar
+
+	local totLbl = Instance.new("TextLabel")
+	totLbl.Size = UDim2.new(0.5, 0, 1, 0)
+	totLbl.Position = UDim2.new(0, 0, 0, 2)
+	totLbl.BackgroundTransparency = 1
+	totLbl.Text = "TOTAL"
+	totLbl.TextColor3 = Color3.fromRGB(150, 150, 180)
+	totLbl.TextSize = 12
+	totLbl.Font = Enum.Font.GothamBold
+	totLbl.TextXAlignment = Enum.TextXAlignment.Left
+	totLbl.ZIndex = 999994
+	totLbl.Parent = totBar
+
+	local totVal = Instance.new("TextLabel")
+	totVal.Name = "TotVal"
+	totVal.Size = UDim2.new(0.5, 0, 1, 0)
+	totVal.Position = UDim2.new(0.5, 0, 0, 2)
+	totVal.BackgroundTransparency = 1
+	totVal.Text = "0"
+	totVal.TextColor3 = Color3.fromRGB(215, 215, 255)
+	totVal.TextSize = 13
+	totVal.Font = Enum.Font.GothamBold
+	totVal.TextXAlignment = Enum.TextXAlignment.Right
+	totVal.ZIndex = 999994
+	totVal.Parent = totBar
+
+	return panel, scroll, totVal, traderLbl
+end
+
+local yourPanel, yourScroll, yourTotVal, _        = makePanel(4,         "YOUR OFFER",  Color3.fromRGB(80,  140, 255))
+local theirPanel, theirScroll, theirTotVal, traderLbl = makePanel(PANEL_W+8, "THEIR OFFER", Color3.fromRGB(255, 100, 100))
+
+------------------------------------------------
+-- STATUS BAR
+------------------------------------------------
+
+local STATUS_H = 46
+local statusBar = Instance.new("Frame")
+statusBar.Size = UDim2.new(1, -10, 0, STATUS_H)
+statusBar.Position = UDim2.new(0, 5, 1, -(STATUS_H+3))
+statusBar.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+statusBar.BorderSizePixel = 0
+statusBar.ZIndex = 999992
+statusBar.Parent = content
+Instance.new("UICorner", statusBar).CornerRadius = UDim.new(0, 7)
+local sbStroke = Instance.new("UIStroke", statusBar)
+sbStroke.Color = Color3.fromRGB(50, 50, 70)
+sbStroke.Thickness = 1
+
+local diffLbl = Instance.new("TextLabel")
+diffLbl.Size = UDim2.new(0.55, 0, 1, 0)
+diffLbl.Position = UDim2.new(0, 14, 0, 0)
+diffLbl.BackgroundTransparency = 1
+diffLbl.Text = "DIFF: —"
+diffLbl.TextColor3 = Color3.fromRGB(150, 150, 185)
+diffLbl.TextSize = 15
+diffLbl.Font = Enum.Font.GothamBold
+diffLbl.TextXAlignment = Enum.TextXAlignment.Left
+diffLbl.ZIndex = 999993
+diffLbl.Parent = statusBar
+
+local badge = Instance.new("TextLabel")
+badge.Size = UDim2.new(0, 120, 0, 32)
+badge.Position = UDim2.new(1, -130, 0.5, -16)
+badge.BackgroundColor3 = Color3.fromRGB(55, 55, 70)
+badge.Text = "NO TRADE"
+badge.TextColor3 = Color3.fromRGB(160, 160, 185)
+badge.TextSize = 14
+badge.Font = Enum.Font.GothamBold
+badge.BorderSizePixel = 0
+badge.ZIndex = 999993
+badge.Parent = statusBar
+Instance.new("UICorner", badge).CornerRadius = UDim.new(0, 7)
+
+------------------------------------------------
+-- ROW BUILDER
+-- state: "active" | "removed"
+------------------------------------------------
+
+local ROW_H = 22
+local rowBg = { even = Color3.fromRGB(26,26,36), odd = Color3.fromRGB(20,20,28) }
+
+local function makeRow(parent, entry, index)
+	local row = Instance.new("Frame")
+	row.Size = UDim2.new(1, -4, 0, ROW_H)
+	row.BackgroundColor3 = (index % 2 == 0) and rowBg.even or rowBg.odd
+	row.BorderSizePixel = 0
+	row.LayoutOrder = index
+	row.ZIndex = 999994
+	row.Parent = parent
+
+	local isRemoved = not entry.active
+
+	-- Left strikethrough line overlay (visual "removed" effect)
+	if isRemoved then
+		local strike = Instance.new("Frame")
+		strike.Size = UDim2.new(1, 0, 0, 1)
+		strike.Position = UDim2.new(0, 0, 0.5, 0)
+		strike.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
+		strike.BackgroundTransparency = 0.2
+		strike.BorderSizePixel = 0
+		strike.ZIndex = 999997
+		strike.Parent = row
+
+		-- Red tint overlay
+		local tint = Instance.new("Frame")
+		tint.Size = UDim2.new(1, 0, 1, 0)
+		tint.BackgroundColor3 = Color3.fromRGB(180, 30, 30)
+		tint.BackgroundTransparency = 0.88
+		tint.BorderSizePixel = 0
+		tint.ZIndex = 999995
+		tint.Parent = row
+	end
+
+	local nameColor = isRemoved and Color3.fromRGB(140, 80, 80) or Color3.fromRGB(210, 210, 230)
+	local qtyColor  = isRemoved and Color3.fromRGB(110, 70, 70) or Color3.fromRGB(140, 140, 170)
+
+	-- Status dot
+	local dot = Instance.new("Frame")
+	dot.Size = UDim2.new(0, 5, 0, 5)
+	dot.Position = UDim2.new(0, 3, 0.5, -3)
+	dot.BackgroundColor3=Color3.fromRGB(60,210,110)
+	dot.BorderSizePixel = 0
+	dot.ZIndex = 999996
+	dot.Parent = row
+	Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+
+	local nameLabel = Instance.new("TextLabel")
+	nameLabel.Size = UDim2.new(0.58, -12, 1, 0)
+	nameLabel.Position = UDim2.new(0, 11, 0, 0)
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.Text = (isRemoved and "~~" or "") .. entry.name
+	nameLabel.TextColor3 = nameColor
+	nameLabel.TextSize = 11
+	nameLabel.Font = isRemoved and Enum.Font.Gotham or Enum.Font.Gotham
+	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+	nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+	nameLabel.ZIndex = 999995
+	nameLabel.Parent = row
+
+	local qtyLabel = Instance.new("TextLabel")
+	qtyLabel.Size = UDim2.new(0.15, 0, 1, 0)
+	qtyLabel.Position = UDim2.new(0.58, 0, 0, 0)
+	qtyLabel.BackgroundTransparency = 1
+	qtyLabel.Text = "x" .. tostring(entry.qty)
+	qtyLabel.TextColor3 = qtyColor
+	qtyLabel.TextSize = 11
+	qtyLabel.Font = Enum.Font.Gotham
+	qtyLabel.TextXAlignment = Enum.TextXAlignment.Center
+	qtyLabel.ZIndex = 999995
+	qtyLabel.Parent = row
+
+	-- Value color tier
+	local valColor
+	if isRemoved then
+		valColor = Color3.fromRGB(130, 70, 70)
+	elseif entry.value >= 1000 then
+		valColor = Color3.fromRGB(255, 210, 80)
+	elseif entry.value >= 100 then
+		valColor = Color3.fromRGB(90, 220, 150)
+	elseif entry.value >= 20 then
+		valColor = Color3.fromRGB(100, 170, 255)
+	else
+		valColor = Color3.fromRGB(170, 170, 195)
+	end
+
+	local valLabel = Instance.new("TextLabel")
+	valLabel.Size = UDim2.new(0.27, -4, 1, 0)
+	valLabel.Position = UDim2.new(0.73, 0, 0, 0)
+	valLabel.BackgroundTransparency = 1
+	valLabel.Text = abbrev(entry.value)
+	valLabel.TextColor3 = valColor
+	valLabel.TextSize = 11
+	valLabel.Font = Enum.Font.GothamBold
+	valLabel.TextXAlignment = Enum.TextXAlignment.Right
+	valLabel.ZIndex = 999995
+	valLabel.Parent = row
+end
+
+local function rebuildScroll(scroll, sideData)
+	-- Destroy old rows only
+	for _, ch in ipairs(scroll:GetChildren()) do
+		if ch:IsA("Frame") then ch:Destroy() end
+	end
+	-- Sort: active first, then removed; alphabetical within each group
+	local list = {}
+	for _, entry in pairs(sideData) do
+		table.insert(list, entry)
+	end
+	table.sort(list, function(a, b)
+		if a.active ~= b.active then return a.active end  -- active first
+		return a.name < b.name
+	end)
+	for i, entry in ipairs(list) do
+		makeRow(scroll, entry, i)
+	end
+	scroll.CanvasSize = UDim2.new(0, 0, 0, #list * (ROW_H+1))
+end
+
+------------------------------------------------
+-- HASHING (skip redraw when nothing changed)
+------------------------------------------------
+
+local function sideHash(sideData)
+	local parts = {}
+	for k, v in pairs(sideData) do
+		table.insert(parts, k .. v.qty .. tostring(v.active))
+	end
+	table.sort(parts)
+	return table.concat(parts, "|")
+end
+
+local lastYourHash  = ""
+local lastTheirHash = ""
+
+------------------------------------------------
+-- MAIN UPDATE
+------------------------------------------------
+
+local function update()
 	local trade = getTrade()
 
 	if not trade then
-		text.Text = "YOU: 0\nTHEM: 0\nDIFF: 0\n[WAITING]"
+		-- Trade closed — reset ghost tracking for next session
+		if tradeActive then
+			tradeActive = false
+			resetSeen()
+			lastYourHash  = ""
+			lastTheirHash = ""
+			rebuildScroll(yourScroll,  seenItems.your)
+			rebuildScroll(theirScroll, seenItems.their)
+			yourTotVal.Text  = "0"
+			theirTotVal.Text = "0"
+			diffLbl.Text = "DIFF: —"
+			diffLbl.TextColor3 = Color3.fromRGB(150, 150, 185)
+			badge.Text = "NO TRADE"
+			badge.BackgroundColor3 = Color3.fromRGB(55, 55, 70)
+			badge.TextColor3 = Color3.fromRGB(160, 160, 185)
+			if traderLbl then traderLbl.Text = "👤 Waiting for trade..." end
+			trackBadge.Visible = false
+		end
 		return
 	end
 
-	local yourValue = getOfferValue(trade:FindFirstChild("YourOffer"))
-	local theirValue = getOfferValue(trade:FindFirstChild("TheirOffer"))
+	tradeActive = true
+	local theirOffer = trade:FindFirstChild("TheirOffer")
+	local yourOffer  = trade:FindFirstChild("YourOffer")
+	local matched    = usernameMatches(theirOffer)
 
-	local diff = yourValue - theirValue
-
-	-- always runs UI logic
-	updateYourOfferVisibility(trade)
-
-	local status, color
-
-	if yourValue > theirValue then
-		status = "LOSS"
-		color = Color3.fromRGB(255,80,80)
-	elseif yourValue < theirValue then
-		status = "WIN"
-		color = Color3.fromRGB(0,255,120)
-	else
-		status = "FAIR"
-		color = Color3.fromRGB(255,255,120)
+	-- Update trader label
+	if traderLbl then
+		if matched then
+			local displayName = getTraderDisplayName(theirOffer) or "Garuda_Storage0001"
+			traderLbl.Text = "👤 " .. displayName .. "  ✓ TRACKED"
+			traderLbl.TextColor3 = Color3.fromRGB(80, 220, 130)
+			trackBadge.Text = "  🟢 TRACKING ACTIVE"
+			trackBadge.Visible = true
+		else
+			local fallback = nil
+			if theirOffer then
+				for _, obj in ipairs(theirOffer:GetDescendants()) do
+					if obj:IsA("TextLabel") and obj.Text ~= "" then
+						local t = obj.Text
+						if t:match("^%(") and #t >= 4 and #t <= 24 then
+							fallback = t:match("%((.-)%)") or t
+							break
+						end
+					end
+				end
+			end
+			traderLbl.Text = fallback and ("👤 " .. fallback) or "👤 In trade..."
+			traderLbl.TextColor3 = Color3.fromRGB(130, 170, 255)
+			trackBadge.Visible = false
+		end
 	end
 
-	text.TextColor3 = color
-	text.Text =
-		"YOU: " .. yourValue ..
-		"\nTHEM: " .. theirValue ..
-		"\nDIFF: " .. diff ..
-		"\n[" .. status .. "]"
+	-- Read live items for both sides
+	local liveYour  = readLiveItems(yourOffer)
+	local liveTheir = readLiveItems(theirOffer)
+
+	-- Merge into ghost tracker
+	mergeIntoSeen("your",  liveYour)
+	-- Only ghost-track THEIR side when username matches
+	if matched then
+		mergeIntoSeen("their", liveTheir)
+	else
+		-- Without match: just show live items, no ghosts
+		seenItems.their = {}
+		for k, v in pairs(liveTheir) do
+			seenItems.their[k] = {name=v.name, qty=v.qty, value=v.value, active=true}
+		end
+	end
+
+	-- Rebuild tables only when something changed
+	local yh = sideHash(seenItems.your)
+	local th = sideHash(seenItems.their)
+
+	if yh ~= lastYourHash then
+		lastYourHash = yh
+		rebuildScroll(yourScroll, seenItems.your)
+		-- Total = only active items
+		local tot = 0
+		for _, e in pairs(seenItems.your) do if e.active then tot += e.value end end
+		yourTotVal.Text = abbrev(tot)
+	end
+
+	if th ~= lastTheirHash then
+		lastTheirHash = th
+		rebuildScroll(theirScroll, seenItems.their)
+		local tot = 0
+		for _, e in pairs(seenItems.their) do if e.active then tot += e.value end end
+		theirTotVal.Text = abbrev(tot)
+	end
+
+	-- Status bar
+	local yourVal, theirVal = 0, 0
+	for _, e in pairs(seenItems.your)  do if e.active then yourVal  += e.value end end
+	for _, e in pairs(seenItems.their) do if e.active then theirVal += e.value end end
+	local diff = theirVal - yourVal
+
+	diffLbl.Text = string.format("DIFF: %s%s", diff >= 0 and "+" or "", abbrev(diff))
+
+	if yourVal == 0 and theirVal == 0 then
+		badge.Text = "WAITING"
+		badge.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
+		badge.TextColor3 = Color3.fromRGB(150, 150, 180)
+		diffLbl.TextColor3 = Color3.fromRGB(150, 150, 185)
+	elseif yourVal == theirVal then
+		badge.Text = "FAIR"
+		badge.BackgroundColor3 = Color3.fromRGB(45, 130, 50)
+		badge.TextColor3 = Color3.fromRGB(170, 255, 170)
+		diffLbl.TextColor3 = Color3.fromRGB(170, 255, 170)
+	elseif theirVal > yourVal then
+		badge.Text = "WIN ▲"
+		badge.BackgroundColor3 = Color3.fromRGB(28, 95, 175)
+		badge.TextColor3 = Color3.fromRGB(140, 205, 255)
+		diffLbl.TextColor3 = Color3.fromRGB(140, 205, 255)
+	else
+		badge.Text = "LOSS ▼"
+		badge.BackgroundColor3 = Color3.fromRGB(155, 38, 38)
+		badge.TextColor3 = Color3.fromRGB(255, 145, 145)
+		diffLbl.TextColor3 = Color3.fromRGB(255, 145, 145)
+	end
 end
+
+------------------------------------------------
+-- VALUE TAGS on trade slots
+------------------------------------------------
 
 task.spawn(function()
 	while true do
-		updateUI()
-		task.wait(0)
+		local trade = getTrade()
+		if trade then
+			for _, offer in ipairs({trade:FindFirstChild("YourOffer"), trade:FindFirstChild("TheirOffer")}) do
+				if offer and offer:FindFirstChild("Container") then
+					for _, slot in ipairs(offer.Container:GetChildren()) do
+						if slot:IsA("Frame") and slot.Visible then
+							local name = getItemName(slot)
+							local value = 0
+							if name then
+								if isChroma(slot) then name = "Chroma " .. name end
+								value = (ItemValues[name] or 0) * getQty(slot)
+							end
+							local tag = slot:FindFirstChild("V7Tag")
+							if value > 0 then
+								if not tag then
+									tag = Instance.new("TextLabel")
+									tag.Name = "V7Tag"
+									tag.Size = UDim2.new(0, 56, 0, 17)
+									tag.Position = UDim2.new(0, 2, 0, 2)
+									tag.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+									tag.BackgroundTransparency = 0.38
+									tag.TextColor3 = Color3.fromRGB(70, 255, 140)
+									tag.TextSize = 12
+									tag.Font = Enum.Font.GothamBold
+									tag.BorderSizePixel = 0
+									tag.ZIndex = 999999
+									tag.Parent = slot
+									Instance.new("UICorner", tag).CornerRadius = UDim.new(0, 3)
+								end
+								tag.Text = abbrev(value)
+							else
+								if tag then tag:Destroy() end
+							end
+						end
+					end
+				end
+			end
+		end
+		task.wait(0.1)
+	end
+end)
+
+------------------------------------------------
+-- MAIN LOOP
+------------------------------------------------
+
+task.spawn(function()
+	while true do
+		if not isMin then update() end
+		task.wait(0.1)
 	end
 end)
